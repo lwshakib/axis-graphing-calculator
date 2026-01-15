@@ -258,36 +258,36 @@ export default function Home() {
             initial={{ opacity: 0, scale: 0.95 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
-            className="rounded-[4rem] bg-zinc-950 dark:bg-card border-none text-white dark:text-foreground p-16 md:p-32 relative overflow-hidden group border border-border/10 shadow-2xl transition-colors duration-700"
+            className="rounded-[4rem] bg-card border border-border text-foreground p-16 md:p-32 relative overflow-hidden group shadow-2xl transition-colors duration-700"
           >
-            <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-[#47CEAC]/10 to-transparent pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-[#47CEAC]/5 to-transparent pointer-events-none" />
             <div className="relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
               <div>
-                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-white/5 dark:bg-[#47CEAC]/10 text-white/80 dark:text-[#47CEAC] text-[10px] font-black mb-10 border border-white/10 dark:border-[#47CEAC]/20">
+                <div className="inline-flex items-center gap-3 px-4 py-2 rounded-full bg-muted dark:bg-[#47CEAC]/10 text-muted-foreground dark:text-[#47CEAC] text-[10px] font-black mb-10 border border-border">
                   <Play size={14} fill="currentColor" />
                   <span className="tracking-[0.25em] uppercase">Interactive Engine</span>
                 </div>
-                <h2 className="text-5xl md:text-8xl font-black mb-10 leading-[0.9] tracking-tighter text-white dark:text-foreground">Pixel Perfect <br /> Visualization.</h2>
+                <h2 className="text-5xl md:text-8xl font-black mb-10 leading-[0.9] tracking-tighter">Pixel Perfect <br /> Visualization.</h2>
                 <ul className="space-y-8 mb-12">
-                  <li className="flex items-center gap-6 text-xl text-zinc-400 dark:text-muted-foreground font-medium">
+                  <li className="flex items-center gap-6 text-xl text-muted-foreground font-medium">
                     <div className="w-8 h-8 rounded-full bg-[#47CEAC]/20 text-[#47CEAC] flex items-center justify-center shrink-0 shadow-lg"><Zap size={18} fill="currentColor" /></div>
                     <span>Instant rendering with adaptive sampling</span>
                   </li>
-                  <li className="flex items-center gap-6 text-xl text-zinc-400 dark:text-muted-foreground font-medium">
+                  <li className="flex items-center gap-6 text-xl text-muted-foreground font-medium">
                     <div className="w-8 h-8 rounded-full bg-blue-500/20 text-blue-500 flex items-center justify-center shrink-0 shadow-lg"><MousePointer2 size={18} fill="currentColor" /></div>
                     <span>Fluid multi-axis orbit controls</span>
                   </li>
-                  <li className="flex items-center gap-6 text-xl text-zinc-400 dark:text-muted-foreground font-medium">
+                  <li className="flex items-center gap-6 text-xl text-muted-foreground font-medium">
                     <div className="w-8 h-8 rounded-full bg-purple-500/20 text-purple-500 flex items-center justify-center shrink-0 shadow-lg"><Layers size={18} fill="currentColor" /></div>
                     <span>Cloud-synced session management</span>
                   </li>
                 </ul>
-                <Button size="lg" className="h-20 px-12 text-2xl rounded-3xl font-black bg-white dark:bg-[#47CEAC] text-zinc-950 dark:text-white hover:bg-zinc-200 dark:hover:bg-[#36BB9A] shadow-2xl transition-all active:scale-95 border-none" asChild>
+                <Button size="lg" className="h-20 px-12 text-2xl rounded-3xl font-black bg-primary text-primary-foreground hover:bg-primary/90 dark:bg-[#47CEAC] dark:text-white dark:hover:bg-[#36BB9A] shadow-2xl transition-all active:scale-95 border-none" asChild>
                   <Link href="/graph">Launch AXIS Free</Link>
                 </Button>
               </div>
-              <div className="relative aspect-square md:aspect-video rounded-[3rem] overflow-hidden shadow-[0_64px_128px_-32px_rgba(0,0,0,0.5)] bg-zinc-950 dark:bg-zinc-900 border-4 border border-zinc-200 dark:border-zinc-800 transition-all duration-1000 ease-out">
-                <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:32px_32px]" />
+              <div className="relative aspect-square md:aspect-video rounded-[3rem] overflow-hidden shadow-2xl bg-muted dark:bg-zinc-950 border border-border transition-all duration-1000 ease-out">
+                <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808005_1px,transparent_1px),linear-gradient(to_bottom,#80808005_1px,transparent_1px)] bg-[size:32px_32px]" />
                 <div className="absolute inset-0 flex items-center justify-center">
                   <svg viewBox="0 0 100 100" className="w-[85%] h-[85%] text-[#47CEAC] fill-none stroke-[1.5]">
                     <motion.path 
@@ -306,12 +306,12 @@ export default function Home() {
                     />
                   </svg>
                 </div>
-                <div className="absolute top-8 left-8 p-6 bg-white/10 dark:bg-black/40 backdrop-blur-2xl rounded-[2rem] border border-white/20 dark:border-white/5 w-64 shadow-2xl group-hover:translate-x-2 transition-transform duration-700">
+                <div className="absolute top-8 left-8 p-6 bg-background/80 dark:bg-black/40 backdrop-blur-2xl rounded-[2rem] border border-border w-64 shadow-2xl group-hover:translate-x-2 transition-transform duration-700">
                   <div className="text-[#47CEAC] mb-3 font-black text-sm tracking-tighter">f(x) = sin(x)</div>
-                  <div className="text-zinc-600 dark:text-zinc-400 font-bold text-[10px] uppercase tracking-[0.2em] leading-none">High Fidelity Render</div>
+                  <div className="text-muted-foreground font-bold text-[10px] uppercase tracking-[0.2em] leading-none">High Fidelity Render</div>
                 </div>
                 {/* Visual Glow */}
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#47CEAC]/20 blur-[100px] rounded-full pointer-events-none group-hover:scale-150 transition-transform duration-1000" />
+                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-[#47CEAC]/10 blur-[100px] rounded-full pointer-events-none group-hover:scale-150 transition-transform duration-1000" />
               </div>
             </div>
           </motion.div>
