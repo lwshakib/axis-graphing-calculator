@@ -180,9 +180,6 @@ export default function Home() {
               <h2 className="text-5xl md:text-7xl font-black mb-8 tracking-tighter leading-none">Designed for Mastery</h2>
               <p className="text-xl text-muted-foreground font-medium md:max-w-xl">From simple arithmetic to complex 3D plotting, AXIS provides a comprehensive toolkit for all your mathematical needs.</p>
             </div>
-            <Link href="/scientific" className="flex items-center gap-3 text-[#47CEAC] font-black text-lg hover:underline transition-all hover:gap-5">
-              Launch Explorer <ArrowRight size={24} />
-            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
