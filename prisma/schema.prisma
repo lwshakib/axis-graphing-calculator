@@ -23,6 +23,7 @@ model User {
   updatedAt     DateTime  @updatedAt
   sessions      Session[]
   accounts      Account[]
+  savedSessions SavedSession[]
 
   @@unique([email])
   @@map("user")
@@ -74,4 +75,18 @@ model Verification {
 
   @@index([identifier])
   @@map("verification")
+}
+
+model SavedSession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // "graph", "calculator", "scientific", "3d"
+  title     String   @default("Untitled")
+  data      Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@map("saved_session")
 }
