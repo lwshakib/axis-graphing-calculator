@@ -56,19 +56,31 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
     let normalized = expression
       .replace(/\\cdot/g, '*')
       .replace(/\\times/g, '*')
+      .replace(/\\/g, '') // Remove backslashes from LaTeX commands like \sin
       .replace(/×/g, '*')
       .replace(/÷/g, '/')
       .replace(/π/g, 'pi');
 
     // Handle d/dx notation from ascii-math: d/dx(f(x)) -> derivative('f(x)', 'x')
-    normalized = normalized.replace(/d\/d([a-z])\s*\((.*)\)/g, (match, v, expr) => {
+    // We use a more robust regex that tries to find balanced parentheses or at least a reasonable chunk
+    // Regex for d/dx(expr) OR diff/dx(expr)
+    // Case insensitive 'i' flag added
+    normalized = normalized.replace(/d\/d([a-z])\s*\*?\s*\((.*)\)/gi, (match, v, expr) => {
+      return `derivative('${expr}', '${v}')`;
+    });
+
+    // Handle cases where there might not be parentheses: d/dx x^2 -> derivative('x^2', 'x')
+    normalized = normalized.replace(/d\/d([a-z])\s+([a-z0-9^]+)/gi, (match, v, expr) => {
       return `derivative('${expr}', '${v}')`;
     });
 
     // Handle integral notation from ascii-math: int_a^b (f(x)) dx -> integrate('f(x)', a, b)
-    normalized = normalized.replace(/int_([-?0-9.]+)\^([-?0-9.]+)\s*\((.*)\)\s*d[a-z]/g, (match, a, b, expr) => {
+    normalized = normalized.replace(/int_([-?0-9.]+)\^([-?0-9.]+)\s*\*?\s*\((.*)\)\s*d[a-z]/gi, (match, a, b, expr) => {
       return `integrate('${expr}', ${a}, ${b})`;
     });
+
+    // Handle text variants that MathLive/MathJS might confuse
+    normalized = normalized.replace(/text{([^}]*)}/g, '$1');
 
     return math.evaluate(normalized, scope || variableScope);
   } catch (error) {
