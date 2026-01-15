@@ -13,6 +13,22 @@ AXIS is a professional, high-performance mathematical suite designed for precisi
 - **Session Management**: Secure user accounts with social login (Google) and email/password. Automatically sync and manage your mathematical research across devices.
 - **Tactile UI**: A premium, "designed for mastery" aesthetic featuring zero-radius inputs, glassmorphic elements, and smooth animations.
 
+## 📱 App Demo
+
+<div align="center">
+  <img src="public/app-demo/01.png" width="45%" alt="Demo 1" />
+  <img src="public/app-demo/02.png" width="45%" alt="Demo 2" />
+  <br />
+  <img src="public/app-demo/03.png" width="45%" alt="Demo 3" />
+  <img src="public/app-demo/04.png" width="45%" alt="Demo 4" />
+  <br />
+  <img src="public/app-demo/05.png" width="45%" alt="Demo 5" />
+  <img src="public/app-demo/06.png" width="45%" alt="Demo 6" />
+  <br />
+  <img src="public/app-demo/07.png" width="45%" alt="Demo 7" />
+  <img src="public/app-demo/08.png" width="45%" alt="Demo 8" />
+</div>
+
 ## 🛠 Technology Stack
 
 - **Frontend**: [Next.js 15](https://nextjs.org/) (App Router), [React 19](https://react.dev/), [Tailwind CSS](https://tailwindcss.com/)
