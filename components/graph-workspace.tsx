@@ -206,6 +206,7 @@ export function GraphWorkspace({ initialData, sessionId }: GraphWorkspaceProps) 
       try {
         const f = compileMath(eq.expression);
         let first = true;
+        let prevSy: number | null = null;
 
         for (let sx = 0; sx < width; sx++) {
           const x = (sx - width / 2) / zoom + centerX;
@@ -213,14 +214,22 @@ export function GraphWorkspace({ initialData, sessionId }: GraphWorkspaceProps) 
           
           if (typeof y === 'number' && !isNaN(y) && isFinite(y)) {
             const sy = height / 2 + (centerY - y) * zoom;
+            
+            // Break line at asymptotes (e.g. tan(x))
+            if (prevSy !== null && Math.abs(sy - prevSy) > height) {
+              first = true;
+            }
+
             if (first) {
               ctx.moveTo(sx, sy);
               first = false;
             } else {
               ctx.lineTo(sx, sy);
             }
+            prevSy = sy;
           } else {
             first = true;
+            prevSy = null;
           }
         }
         ctx.stroke();
@@ -359,7 +368,7 @@ export function GraphWorkspace({ initialData, sessionId }: GraphWorkspaceProps) 
                     onChange={(e) => updateEquation(eq.id, e.target.value)}
                     onFocus={() => setActiveEquationId(eq.id)}
                     placeholder="Type an equation"
-                    className="border-none bg-transparent shadow-none focus-visible:ring-0 text-lg p-0 h-auto font-mono placeholder:text-muted-foreground/30 transition-all"
+                    className="border-none bg-transparent shadow-none focus-visible:ring-0 text-lg p-0 h-auto font-mono placeholder:text-muted-foreground/30 transition-all rounded-none"
                   />
                 </div>
                 <Button 

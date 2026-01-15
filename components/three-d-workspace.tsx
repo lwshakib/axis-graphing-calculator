@@ -89,6 +89,7 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
     if (!containerRef.current) return;
 
     const scene = new THREE.Scene();
+    scene.fog = new THREE.FogExp2(isDark ? 0x020617 : 0xffffff, 0.02);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
@@ -109,7 +110,7 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
     scene.add(objectsGroup);
     objectsGroupRef.current = objectsGroup;
 
-    const gridHelper = new THREE.GridHelper(10, 10, isDark ? 0x334155 : 0xcbd5e1, isDark ? 0x1e293b : 0xe2e8f0);
+    const gridHelper = new THREE.GridHelper(200, 200, isDark ? 0x334155 : 0xcbd5e1, isDark ? 0x1e293b : 0xe2e8f0);
     scene.add(gridHelper);
     gridHelperRef.current = gridHelper;
 
@@ -158,10 +159,13 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
   useEffect(() => {
     if (gridHelperRef.current) {
         const gh = gridHelperRef.current;
-        const newGrid = new THREE.GridHelper(10, 10, isDark ? 0x334155 : 0xcbd5e1, isDark ? 0x1e293b : 0xe2e8f0);
+        const newGrid = new THREE.GridHelper(200, 200, isDark ? 0x334155 : 0xcbd5e1, isDark ? 0x1e293b : 0xe2e8f0);
         sceneRef.current?.remove(gh);
         sceneRef.current?.add(newGrid);
         gridHelperRef.current = newGrid;
+    }
+    if (sceneRef.current) {
+        sceneRef.current.fog = new THREE.FogExp2(isDark ? 0x020617 : 0xffffff, 0.02);
     }
     if (zAxisLineRef.current) {
         (zAxisLineRef.current.material as THREE.LineBasicMaterial).color.set(isDark ? 0x64748b : 0x94a3b8);
@@ -203,14 +207,14 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
       
       try {
         const fn = compileMath(s.equation);
-        const segments = 40;
-        const range = 5;
+        const segments = 150; // Increased for detail
+        const range = 50; // Increased significantly for infinity feel
         const geometry = new THREE.PlaneGeometry(range * 2, range * 2, segments, segments);
         const material = new THREE.MeshPhongMaterial({ 
           color: s.color, 
           side: THREE.DoubleSide, 
           transparent: true, 
-          opacity: 0.7,
+          opacity: 0.8,
           wireframe: false 
         });
 
@@ -230,7 +234,7 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
 
         const wireframe = new THREE.WireframeGeometry(geometry);
         const line = new THREE.LineSegments(wireframe);
-        line.material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.1, transparent: true });
+        line.material = new THREE.LineBasicMaterial({ color: 0x000000, opacity: 0.05, transparent: true });
         line.rotation.x = -Math.PI / 2;
         group.add(line);
 
@@ -345,7 +349,7 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
                       <div className="w-4 h-4 rounded-full cursor-pointer shadow-md transition-all hover:scale-110 relative group/color" style={{ backgroundColor: v.color }}>
                          <input type="color" value={v.color} className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair" onChange={(e) => updateVector(v.id, 'color', e.target.value)} />
                       </div>
-                      <input className="bg-transparent border-none font-bold text-sm w-16 outline-none" value={v.label} onChange={(e) => updateVector(v.id, 'label', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'label' })} />
+                      <input className="bg-transparent border-none font-bold text-sm w-16 outline-none rounded-none" value={v.label} onChange={(e) => updateVector(v.id, 'label', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'label' })} />
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button onClick={() => updateVector(v.id, 'visible', !v.visible)} className={cn("p-1.5 rounded-lg", v.visible ? "text-indigo-600" : "text-muted-foreground")}>
@@ -359,15 +363,15 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
                   <div className="grid grid-cols-3 gap-2">
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-bold text-muted-foreground/60">X</label>
-                      <Input value={v.x} onChange={(e) => updateVector(v.id, 'x', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'x' })} className="h-8 text-center bg-transparent border-none shadow-none" />
+                      <Input value={v.x} onChange={(e) => updateVector(v.id, 'x', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'x' })} className="h-8 text-center bg-transparent border-none shadow-none rounded-none" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-bold text-muted-foreground/60">Y</label>
-                      <Input value={v.y} onChange={(e) => updateVector(v.id, 'y', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'y' })} className="h-8 text-center bg-transparent border-none shadow-none" />
+                      <Input value={v.y} onChange={(e) => updateVector(v.id, 'y', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'y' })} className="h-8 text-center bg-transparent border-none shadow-none rounded-none" />
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase font-bold text-muted-foreground/60">Z</label>
-                      <Input value={v.z} onChange={(e) => updateVector(v.id, 'z', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'z' })} className="h-8 text-center bg-transparent border-none shadow-none" />
+                      <Input value={v.z} onChange={(e) => updateVector(v.id, 'z', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'z' })} className="h-8 text-center bg-transparent border-none shadow-none rounded-none" />
                     </div>
                   </div>
                 </div>
@@ -403,7 +407,7 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
                   </div>
                   <div className="space-y-1">
                     <label className="text-[10px] uppercase font-bold text-muted-foreground/60">z =</label>
-                    <Input value={s.equation} onChange={(e) => updateSurface(s.id, 'equation', e.target.value)} onFocus={() => setActiveInput({ type: 'surface', id: s.id })} className="h-8 font-mono text-sm bg-transparent border-none shadow-none" />
+                    <Input value={s.equation} onChange={(e) => updateSurface(s.id, 'equation', e.target.value)} onFocus={() => setActiveInput({ type: 'surface', id: s.id })} className="h-8 font-mono text-sm bg-transparent border-none shadow-none rounded-none" />
                   </div>
                 </div>
               ))}
