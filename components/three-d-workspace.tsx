@@ -89,7 +89,6 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
     if (!containerRef.current) return;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(isDark ? 0x020617 : 0xffffff, 0.02);
     sceneRef.current = scene;
 
     const camera = new THREE.PerspectiveCamera(75, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 1000);
@@ -110,7 +109,7 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
     scene.add(objectsGroup);
     objectsGroupRef.current = objectsGroup;
 
-    const gridHelper = new THREE.GridHelper(200, 200, isDark ? 0x334155 : 0xcbd5e1, isDark ? 0x1e293b : 0xe2e8f0);
+    const gridHelper = new THREE.GridHelper(20, 20, isDark ? 0x334155 : 0xcbd5e1, isDark ? 0x1e293b : 0xe2e8f0);
     scene.add(gridHelper);
     gridHelperRef.current = gridHelper;
 
@@ -159,13 +158,13 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
   useEffect(() => {
     if (gridHelperRef.current) {
         const gh = gridHelperRef.current;
-        const newGrid = new THREE.GridHelper(200, 200, isDark ? 0x334155 : 0xcbd5e1, isDark ? 0x1e293b : 0xe2e8f0);
+        const newGrid = new THREE.GridHelper(20, 20, isDark ? 0x334155 : 0xcbd5e1, isDark ? 0x1e293b : 0xe2e8f0);
         sceneRef.current?.remove(gh);
         sceneRef.current?.add(newGrid);
         gridHelperRef.current = newGrid;
     }
     if (sceneRef.current) {
-        sceneRef.current.fog = new THREE.FogExp2(isDark ? 0x020617 : 0xffffff, 0.02);
+        sceneRef.current.fog = null;
     }
     if (zAxisLineRef.current) {
         (zAxisLineRef.current.material as THREE.LineBasicMaterial).color.set(isDark ? 0x64748b : 0x94a3b8);
@@ -207,8 +206,8 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
       
       try {
         const fn = compileMath(s.equation);
-        const segments = 150; // Increased for detail
-        const range = 50; // Increased significantly for infinity feel
+        const segments = 60; 
+        const range = 10; 
         const geometry = new THREE.PlaneGeometry(range * 2, range * 2, segments, segments);
         const material = new THREE.MeshPhongMaterial({ 
           color: s.color, 
@@ -391,8 +390,8 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
                 <div key={s.id} className="p-4 bg-transparent border border-border rounded-2xl space-y-3 group Transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 rounded-full" style={{ backgroundColor: s.color }}>
-                         <input type="color" value={s.color} className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair" onChange={(e) => updateSurface(s.id, 'color', e.target.value)} />
+                      <div className="w-4 h-4 rounded-full relative overflow-hidden ring-1 ring-border shadow-sm group/color" style={{ backgroundColor: s.color }}>
+                         <input type="color" value={s.color} className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair scale-150" onChange={(e) => updateSurface(s.id, 'color', e.target.value)} />
                       </div>
                       <span className="text-sm font-bold">Surface</span>
                     </div>
