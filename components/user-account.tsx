@@ -13,11 +13,36 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { History, LogOut, User as UserIcon, LogIn } from "lucide-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
+import { AuthDialog } from "@/components/auth-dialog";
 
 export function UserAccount() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
+  const pathname = usePathname();
+
+  const handleLogOut = async () => {
+    const parts = pathname.split("/").filter(Boolean);
+    const tools = ["graph", "calculator", "scientific", "3d", "dashboard"];
+    
+    let target = pathname;
+
+    // Check if we are on a session page: /tool/some-id
+    if (parts.length === 2 && tools.includes(parts[0])) {
+      target = `/${parts[0]}`;
+    } else if (parts[0] === "dashboard") {
+      target = "/";
+    }
+
+    await authClient.signOut({ 
+      fetchOptions: { 
+        onSuccess: () => {
+          router.push(target);
+          router.refresh();
+        } 
+      } 
+    });
+  };
 
   if (isPending) {
     return <div className="w-9 h-9 rounded-full bg-muted animate-pulse" />;
@@ -26,21 +51,23 @@ export function UserAccount() {
   if (!session) {
     return (
       <div className="flex items-center gap-2">
-        <Button 
-          variant="ghost" 
-          size="sm" 
-          className="font-semibold px-4"
-          onClick={() => authClient.signIn.social({ provider: "google" })}
-        >
-          Log In
-        </Button>
-        <Button 
-          size="sm" 
-          className="font-bold px-4 rounded-full shadow-lg shadow-primary/10 transition-all hover:scale-105"
-          onClick={() => authClient.signIn.social({ provider: "google" })}
-        >
-          Sign Up
-        </Button>
+        <AuthDialog>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="font-semibold px-4"
+          >
+            Log In
+          </Button>
+        </AuthDialog>
+        <AuthDialog>
+          <Button 
+            size="sm" 
+            className="font-bold px-4 rounded-full shadow-lg shadow-primary/10 transition-all hover:scale-105"
+          >
+            Sign Up
+          </Button>
+        </AuthDialog>
       </div>
     );
   }
@@ -79,7 +106,7 @@ export function UserAccount() {
         <DropdownMenuSeparator />
         <DropdownMenuItem 
           className="rounded-xl cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
-          onClick={() => authClient.signOut({ fetchOptions: { onSuccess: () => router.push("/") } })}
+          onClick={handleLogOut}
         >
           <LogOut className="mr-2 h-4 w-4" />
           <span className="font-bold">Log Out</span>
