@@ -345,8 +345,8 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
                 <div key={v.id} className="p-4 bg-transparent border border-border rounded-2xl space-y-3 group transition-all duration-300 relative overflow-hidden">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 rounded-full cursor-pointer shadow-md transition-all hover:scale-110 relative group/color" style={{ backgroundColor: v.color }}>
-                         <input type="color" value={v.color} className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair" onChange={(e) => updateVector(v.id, 'color', e.target.value)} />
+                      <div className="w-4 h-4 rounded-full relative overflow-hidden ring-2 ring-white/10 shadow-md transition-all hover:scale-110 group/color" style={{ backgroundColor: v.color }}>
+                         <input type="color" value={v.color} className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair scale-150" onChange={(e) => updateVector(v.id, 'color', e.target.value)} onClick={(e) => e.stopPropagation()} />
                       </div>
                       <input className="bg-transparent border-none font-bold text-sm w-16 outline-none rounded-none" value={v.label} onChange={(e) => updateVector(v.id, 'label', e.target.value)} onFocus={() => setActiveInput({ type: 'vector', id: v.id, field: 'label' })} />
                     </div>
@@ -390,8 +390,8 @@ export function ThreeDWorkspace({ initialData, sessionId }: ThreeDWorkspaceProps
                 <div key={s.id} className="p-4 bg-transparent border border-border rounded-2xl space-y-3 group Transition-all">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-4 h-4 rounded-full relative overflow-hidden ring-1 ring-border shadow-sm group/color" style={{ backgroundColor: s.color }}>
-                         <input type="color" value={s.color} className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair scale-150" onChange={(e) => updateSurface(s.id, 'color', e.target.value)} />
+                      <div className="w-4 h-4 rounded-full relative overflow-hidden ring-2 ring-white/10 shadow-md transition-all hover:scale-110 group/color" style={{ backgroundColor: s.color }}>
+                         <input type="color" value={s.color} className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair scale-150" onChange={(e) => updateSurface(s.id, 'color', e.target.value)} onClick={(e) => e.stopPropagation()} />
                       </div>
                       <span className="text-sm font-bold">Surface</span>
                     </div>

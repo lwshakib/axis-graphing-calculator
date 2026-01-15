@@ -206,30 +206,46 @@ export function GraphWorkspace({ initialData, sessionId }: GraphWorkspaceProps) 
       try {
         const f = compileMath(eq.expression);
         let first = true;
+        let prevX: number | null = null;
+        let prevYValue: number | null = null;
         let prevSy: number | null = null;
 
+        // Sampling improvement: 
+        // We evaluate more points per pixel if the slope is high to ensure we reach the screen edge.
         for (let sx = 0; sx < width; sx++) {
           const x = (sx - width / 2) / zoom + centerX;
-          const y = f({ x });
           
-          if (typeof y === 'number' && !isNaN(y) && isFinite(y)) {
-            const sy = height / 2 + (centerY - y) * zoom;
+          // Adaptive sampling: evaluate 3 points per pixel
+          const subSamples = 3;
+          for (let s = 0; s < subSamples; s++) {
+            const currentX = x + (s / subSamples) / zoom;
+            const yValue = f({ x: currentX });
             
-            // Break line at asymptotes (e.g. tan(x))
-            if (prevSy !== null && Math.abs(sy - prevSy) > height) {
-              first = true;
-            }
+            if (typeof yValue === 'number' && !isNaN(yValue) && isFinite(yValue)) {
+              const sy = height / 2 + (centerY - yValue) * zoom;
+              
+              // Break line if we cross an asymptote (sign flip + huge jump)
+              if (prevYValue !== null && prevSy !== null) {
+                const jump = Math.abs(sy - prevSy);
+                const signFlip = (yValue > 0 && prevYValue < 0) || (yValue < 0 && prevYValue > 0);
+                if (signFlip && jump > height) {
+                  first = true;
+                }
+              }
 
-            if (first) {
-              ctx.moveTo(sx, sy);
-              first = false;
+              if (first) {
+                ctx.moveTo(sx + s/subSamples, sy);
+                first = false;
+              } else {
+                ctx.lineTo(sx + s/subSamples, sy);
+              }
+              prevSy = sy;
+              prevYValue = yValue;
             } else {
-              ctx.lineTo(sx, sy);
+              first = true;
+              prevSy = null;
+              prevYValue = null;
             }
-            prevSy = sy;
-          } else {
-            first = true;
-            prevSy = null;
           }
         }
         ctx.stroke();
@@ -280,7 +296,7 @@ export function GraphWorkspace({ initialData, sessionId }: GraphWorkspaceProps) 
     const delta = -e.deltaY;
     const factor = Math.pow(1.1, delta / 100);
     setViewport(v => {
-        const newZoom = Math.max(0.1, Math.min(v.zoom * factor, 1000000));
+        const newZoom = Math.max(1e-12, Math.min(v.zoom * factor, 1e12));
         return { ...v, zoom: newZoom };
     });
   };
@@ -353,13 +369,15 @@ export function GraphWorkspace({ initialData, sessionId }: GraphWorkspaceProps) 
                 >
                   {eq.visible && <div className="w-2.5 h-2.5 rounded-full bg-white shadow-sm" />}
                   <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/color:opacity-100 transition-opacity">
-                    <input 
-                      type="color" 
-                      value={eq.color}
-                      className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair"
-                      onClick={(e) => e.stopPropagation()}
-                      onChange={(e) => updateEquationColor(eq.id, e.target.value)}
-                    />
+                    <div className="w-full h-full relative">
+                      <input 
+                        type="color" 
+                        value={eq.color}
+                        className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair scale-150"
+                        onClick={(e) => e.stopPropagation()} // Prevent click from propagating to parent div (visibility toggle)
+                        onChange={(e) => updateEquationColor(eq.id, e.target.value)}
+                      />
+                    </div>
                   </div>
                 </div>
                 <div className="flex-1 min-w-0">
