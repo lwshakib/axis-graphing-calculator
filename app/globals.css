@@ -128,4 +128,37 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Custom Scrollbar - Advanced Premium UI */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-muted-foreground/30 rounded-full transition-colors duration-300;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #47CEAC; /* AXIS Primary */
+  }
+  
+  /* Support for Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(153, 153, 153, 0.3) transparent;
+  }
+}
+
+/* Custom class for specific scrollable areas if needed */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(153, 153, 153, 0.2);
+  border-radius: 10px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #47CEAC;
 }

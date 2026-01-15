@@ -466,10 +466,6 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
       </div>
       
       <style jsx global>{`
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; }
         
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
