@@ -13,6 +13,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { motion } from "framer-motion";
+import { UserAccount } from "@/components/user-account";
 
 const navItems = [
   {
@@ -53,14 +56,19 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:bg-accent",
-                  isActive
-                    ? "bg-primary text-primary-foreground hover:bg-primary/90"
-                    : "text-muted-foreground"
+                  "relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 group",
+                  isActive ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
                 )}
               >
-                <Icon size={16} />
-                {item.name}
+                {isActive && (
+                  <motion.div
+                    layoutId="active-nav-pill"
+                    className="absolute inset-0 bg-primary rounded-full -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
+                <Icon size={16} className={cn("transition-transform group-hover:scale-110", isActive && "relative z-10")} />
+                <span className={cn(isActive && "relative z-10")}>{item.name}</span>
               </Link>
             );
           })}
@@ -69,12 +77,7 @@ export function Navbar() {
 
       <div className="flex items-center gap-4">
         <div className="hidden sm:flex items-center gap-2">
-          <Button variant="ghost" size="sm" className="font-semibold px-4">
-            Log In
-          </Button>
-          <Button size="sm" className="font-semibold px-4 rounded-full">
-            Sign Up
-          </Button>
+          <UserAccount />
         </div>
 
         {/* Mobile Menu */}
@@ -85,29 +88,36 @@ export function Navbar() {
                 <Menu size={24} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl backdrop-blur-xl bg-background/90 border-border/50">
               {navItems.map((item) => {
                 const Icon = item.icon;
+                const isActive = pathname === item.href;
                 return (
-                  <DropdownMenuItem key={item.href} asChild>
+                  <DropdownMenuItem key={item.href} asChild className="rounded-xl mb-1">
                     <Link
                       href={item.href}
-                      className="flex items-center gap-2 w-full cursor-pointer"
+                      className={cn(
+                        "flex items-center gap-3 w-full cursor-pointer px-3 py-2.5 transition-all",
+                        isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                      )}
                     >
-                      <Icon size={16} />
-                      {item.name}
+                      <Icon size={18} className={isActive ? "text-white" : "text-muted-foreground"} />
+                      <span className="font-semibold">{item.name}</span>
                     </Link>
                   </DropdownMenuItem>
                 );
               })}
-              <div className="h-px bg-muted my-1 sm:hidden" />
-              <DropdownMenuItem className="sm:hidden">Log In</DropdownMenuItem>
-              <DropdownMenuItem className="sm:hidden font-bold">Sign Up</DropdownMenuItem>
+              <div className="h-px bg-muted/50 my-2 sm:hidden mx-2" />
+              <DropdownMenuItem asChild className="sm:hidden rounded-xl">
+                 <UserAccount />
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
 
-        <Button variant="ghost" size="icon" className="text-muted-foreground">
+        <ThemeToggle />
+
+        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary transition-colors">
           <Settings size={20} />
         </Button>
       </div>
