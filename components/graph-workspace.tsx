@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Plus, X, Settings, RotateCcw, ChevronLeft, ChevronRight, Keyboard, Save, LogIn, Trash2, Edit3, Loader2 } from 'lucide-react';
+import { Plus, X, Settings, RotateCcw, ChevronLeft, ChevronRight, Keyboard, Save, LogIn, Trash2, Edit3, Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -389,14 +389,27 @@ export function GraphWorkspace({ initialData, sessionId }: GraphWorkspaceProps) 
                     className="border-none bg-transparent shadow-none focus-visible:ring-0 text-lg p-0 h-auto font-mono placeholder:text-muted-foreground/30 transition-all rounded-none"
                   />
                 </div>
-                <Button 
-                   variant="ghost" 
-                   size="icon" 
-                   className="h-8 w-8 text-gray-300 opacity-0 group-hover:opacity-100 hover:text-destructive transition-all"
-                   onClick={() => removeEquation(eq.id)}
-                >
-                  <X size={16} />
-                </Button>
+                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className={cn(
+                      "h-8 w-8 transition-all",
+                      eq.visible ? "text-primary" : "text-muted-foreground"
+                    )}
+                    onClick={() => toggleVisibility(eq.id)}
+                  >
+                    {eq.visible ? <Eye size={16} /> : <EyeOff size={16} />}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 text-gray-300 hover:text-destructive transition-all"
+                    onClick={() => removeEquation(eq.id)}
+                  >
+                    <X size={16} />
+                  </Button>
+                </div>
               </div>
             ))}
             <div 
