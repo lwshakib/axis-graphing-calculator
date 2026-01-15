@@ -91,10 +91,6 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
   const [matrixData, setMatrixData] = useState<string[][]>([["0", "0"], ["0", "0"]]);
   const [matrixVarName, setMatrixVarName] = useState("A");
 
-  // Integration State
-  const [intA, setIntA] = useState("0");
-  const [intB, setIntB] = useState("1");
-
   useEffect(() => {
     setMounted(true);
     if (mfRef.current) {
@@ -103,7 +99,7 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
       mf.addEventListener("input", () => {
         setError(null);
       });
-      mf.value = "0";
+      mf.value = "";
     }
   }, []);
 
@@ -117,7 +113,9 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
   const handleCalculate = () => {
     if (!mfRef.current) return;
     
+    // Use ascii-math output for better compatibility with our parser
     const expression = mfRef.current.getValue("ascii-math");
+    const latex = mfRef.current.value;
     
     try {
       if (expression.includes("=")) {
@@ -126,17 +124,17 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
           const val = evaluateMath(expr);
           setVariable(name, val);
           setVariablesList(prev => ({ ...prev, [name]: formatResult(val) }));
-          setEquation(expression);
+          setEquation(latex);
           setResult(val);
-          setHistoryList(prev => [{ expr: expression, res: val }, ...prev].slice(0, 5));
+          setHistoryList(prev => [{ expr: latex, res: val }, ...prev].slice(0, 5));
           return;
         }
       }
 
       const res = evaluateMath(expression);
-      setEquation(expression + " =");
+      setEquation(latex + " =");
       setResult(res);
-      setHistoryList(prev => [{ expr: expression, res: res }, ...prev].slice(0, 5));
+      setHistoryList(prev => [{ expr: latex, res: res }, ...prev].slice(0, 5));
       setError(null);
     } catch (e: any) {
       setError(e.message || "Math Error");
@@ -144,44 +142,10 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
     }
   };
 
-  const handleDerivative = () => {
-    if (!mfRef.current) return;
-    const expression = mfRef.current.getValue("ascii-math");
-    try {
-      const res = derivative(expression, 'x');
-      insertAtCursor(`\\frac{d}{dx}(${mfRef.current.value}) = ${res}`, { latex: true });
-    } catch (e: any) {
-      setError(e.message || "Derivative Error");
-    }
-  };
-
-  const handleSimplify = () => {
-    if (!mfRef.current) return;
-    const expression = mfRef.current.getValue("ascii-math");
-    try {
-      const res = simplify(expression);
-      setEquation(`simplify(${expression}) =`);
-      setResult(res);
-    } catch (e: any) {
-      setError(e.message || "Simplify Error");
-    }
-  };
-
-  const handleIntegrate = () => {
-    if (!mfRef.current) return;
-    const expression = mfRef.current.getValue("ascii-math");
-    try {
-      const res = integrate(expression, parseFloat(intA), parseFloat(intB));
-      setEquation(`∫_{${intA}}^{${intB}} (${expression}) dx =`);
-      setResult(res);
-    } catch (e: any) {
-      setError(e.message || "Integration Error");
-    }
-  };
 
   const clear = () => {
     if (mfRef.current) {
-      mfRef.current.value = "0";
+      mfRef.current.value = "";
     }
     setEquation("");
     setResult(null);
@@ -367,56 +331,34 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
                 <Sigma size={14} className="text-purple-500" /> Functions
               </h3>
               <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-                <SciFuncButton onClick={() => insertAtCursor('\\sin(')}>sin</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\cos(')}>cos</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\tan(')}>tan</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\arcsin(')}>asin</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\arccos(')}>acos</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\sin(#?)')}>sin</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\cos(#?)')}>cos</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\tan(#?)')}>tan</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\arcsin(#?)')}>asin</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\arccos(#?)')}>acos</SciFuncButton>
 
-                <SciFuncButton onClick={() => insertAtCursor('\\sinh(')}>sinh</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\cosh(')}>cosh</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\tanh(')}>tanh</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\arctan(')}>atan</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\text{abs}(')}>abs</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\sinh(#?)')}>sinh</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\cosh(#?)')}>cosh</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\tanh(#?)')}>tanh</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\arctan(#?)')}>atan</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\text{abs}(#?)')}>abs</SciFuncButton>
 
-                <SciFuncButton onClick={() => insertAtCursor('\\log(')}>log</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\ln(')}>ln</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\log(#?)')}>log</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\ln(#?)')}>ln</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('\\sqrt{#@}')}>√</SciFuncButton>
-                <SciFuncButton onClick={handleDerivative} className="text-indigo-600 font-bold">d/dx</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\frac{d}{dx}(#?)')} className="text-indigo-600 font-bold">d/dx</SciFuncButton>
                 
-                <Dialog>
-                  <DialogTrigger asChild>
-                    <SciFuncButton className="text-emerald-600 font-bold">∫ dx</SciFuncButton>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[320px] bg-white dark:bg-zinc-900 rounded-[2rem] border-none shadow-2xl p-8">
-                    <DialogHeader>
-                      <DialogTitle className="text-xl font-black">Definite Integral</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-4 space-y-6">
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">Lower (a)</label>
-                          <Input value={intA} onChange={(e) => setIntA(e.target.value)} className="h-12 text-center rounded-xl font-bold" />
-                        </div>
-                        <div className="space-y-1.5">
-                          <label className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest pl-1">Upper (b)</label>
-                          <Input value={intB} onChange={(e) => setIntB(e.target.value)} className="h-12 text-center rounded-xl font-bold" />
-                        </div>
-                      </div>
-                      <Button onClick={handleIntegrate} className="w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl h-14 font-black shadow-lg shadow-emerald-500/20 active:scale-95 transition-all">Calculate ∫</Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
+                <SciFuncButton onClick={() => insertAtCursor('\\int_{#?}^{#?}(#?)dx')} className="text-emerald-600 font-bold">∫ dx</SciFuncButton>
 
                 <SciFuncButton onClick={() => insertAtCursor('e')}>e</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('\\pi')}>π</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('^{2}')}>x²</SciFuncButton>
-                <SciFuncButton onClick={handleSimplify} className="text-indigo-600 font-bold">simp</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\text{transpose}(')} className="text-indigo-600">T</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\text{simplify}(#?)')} className="text-indigo-600 font-bold">simp</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\text{transpose}(#?)')} className="text-indigo-600">T</SciFuncButton>
 
-                <SciFuncButton onClick={() => insertAtCursor('\\text{inv}(')} className="text-indigo-600">inv</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\text{det}(')} className="text-indigo-600">det</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\text{trace}(')} className="text-indigo-600">tr</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\text{inv}(#?)')} className="text-indigo-600">inv</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\text{det}(#?)')} className="text-indigo-600">det</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\text{trace}(#?)')} className="text-indigo-600">tr</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('\\text{dot}(#?,#?)')} className="text-indigo-600">dot</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('\\text{cross}(#?,#?)')} className="text-indigo-600">cross</SciFuncButton>
 
@@ -424,7 +366,7 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
                 <SciFuncButton onClick={() => insertAtCursor(')')} className="bg-zinc-100 dark:bg-zinc-800 text-indigo-600 font-black">)</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('^')} className="bg-zinc-100 dark:bg-zinc-800 text-indigo-600 font-black">^</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor(',')} className="bg-zinc-100 dark:bg-zinc-800 text-zinc-500 font-black">,</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\text{norm}(')} className="text-indigo-600">norm</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('\\text{norm}(#?)')} className="text-indigo-600">norm</SciFuncButton>
               </div>
             </div>
 
