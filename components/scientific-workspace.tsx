@@ -47,18 +47,22 @@ function MatrixRenderer({ data }: { data: any[][] | any }) {
   const matrix = Array.isArray(data) ? data : (data.toArray ? data.toArray() : [data]);
   
   return (
-    <div className="inline-flex items-center gap-1 my-2">
-      <div className="w-1.5 h-full border-l-2 border-t-2 border-b-2 border-zinc-400 dark:border-zinc-500 rounded-l-sm" />
-      <div className="grid gap-x-4 gap-y-2 p-1" style={{ 
+    <div className="inline-flex items-stretch gap-2 my-2 py-1">
+      {/* Left Bracket */}
+      <div className="w-2.5 border-l-2 border-t-2 border-b-2 border-zinc-400 dark:border-zinc-500 rounded-l-md" />
+      
+      <div className="grid gap-x-6 gap-y-3 p-2 items-center" style={{ 
         gridTemplateColumns: `repeat(${Array.isArray(matrix[0]) ? matrix[0].length : 1}, auto)` 
       }}>
         {matrix.flat().map((cell: any, i: number) => (
-          <div key={i} className="text-center font-mono text-sm md:text-base px-1">
+          <div key={i} className="text-center font-mono text-base md:text-lg px-2 font-bold text-zinc-800 dark:text-zinc-200">
             {typeof cell === 'number' ? Number(cell.toFixed(4)) : String(cell)}
           </div>
         ))}
       </div>
-      <div className="w-1.5 h-full border-r-2 border-t-2 border-b-2 border-zinc-400 dark:border-zinc-500 rounded-r-sm" />
+      
+      {/* Right Bracket */}
+      <div className="w-2.5 border-r-2 border-t-2 border-b-2 border-zinc-400 dark:border-zinc-500 rounded-r-md" />
     </div>
   );
 }
@@ -113,26 +117,40 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
   const handleCalculate = () => {
     if (!mfRef.current) return;
     
-    // Use ascii-math output for better compatibility with our parser
-    const expression = mfRef.current.getValue("ascii-math");
+    // Use LaTeX output for robust parsing of commands like \text{abc}, \left|, etc.
     const latex = mfRef.current.value;
+    const expression = latex;
     
     try {
-      if (expression.includes("=")) {
-        const [name, expr] = expression.split("=").map(s => s.trim());
-        if (name && expr) {
+      // Check for assignment: "A = 10"
+      const assignmentMatch = expression.match(/^([a-z][a-z0-9]*)\s*=\s*(.*)$/i);
+      
+      if (assignmentMatch) {
+        const name = assignmentMatch[1];
+        const expr = assignmentMatch[2];
+        
+        if (expr.trim()) {
           const val = evaluateMath(expr);
           setVariable(name, val);
           setVariablesList(prev => ({ ...prev, [name]: formatResult(val) }));
           setEquation(latex);
           setResult(val);
           setHistoryList(prev => [{ expr: latex, res: val }, ...prev].slice(0, 5));
+          setError(null);
           return;
         }
       }
 
-      const res = evaluateMath(expression);
-      setEquation(latex + " =");
+      // If it ends with '=', strip it before evaluation
+      const evalExpr = expression.endsWith('=') ? expression.slice(0, -1).trim() : expression.trim();
+      
+      if (!evalExpr) {
+        setResult(null);
+        return;
+      }
+
+      const res = evaluateMath(evalExpr);
+      setEquation(latex + (latex.includes('=') ? '' : ' ='));
       setResult(res);
       setHistoryList(prev => [{ expr: latex, res: res }, ...prev].slice(0, 5));
       setError(null);
@@ -159,8 +177,17 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
   };
 
   const createMatrix = () => {
-    const matrixStr = "[" + matrixData.map(row => "[" + row.join(",") + "]").join(",") + "]";
-    insertAtCursor(`${matrixVarName} = ${matrixStr}`);
+    // Generate LaTeX bmatrix for visual consistency in MathLive
+    const latexRows = matrixData.map(row => row.join(" & ")).join(" \\\\ ");
+    const matrixStr = `\\begin{bmatrix} ${latexRows} \\end{bmatrix}`;
+    
+    // We insert it as LaTeX
+    if (mfRef.current) {
+      // If it's an assignment, we should include the variable name
+      const content = matrixVarName ? `${matrixVarName} = ${matrixStr}` : matrixStr;
+      mfRef.current.insert(content, { focus: true });
+    }
+    
     setIsDialogOpen(false);
   };
 
@@ -311,12 +338,13 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
                       {error}
                     </div>
                   ) : result !== null ? (
-                    <div className="flex items-baseline gap-3 text-emerald-600 dark:text-emerald-400 animate-in fade-in slide-in-from-right-4">
-                      <span className="text-xl font-black opacity-40">=</span>
+                    <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 animate-in fade-in slide-in-from-right-4">
                       { (result && (result.isMatrix || Array.isArray(result))) ? (
                         <MatrixRenderer data={result} />
                       ) : (
-                        <span className="text-3xl font-black tracking-tight">{formatResult(result)}</span>
+                        <>
+                          <span className="text-3xl font-black tracking-tight">{formatResult(result)}</span>
+                        </>
                       )}
                     </div>
                   ) : null}
@@ -341,7 +369,7 @@ export function ScientificWorkspace({ initialData, sessionId }: ScientificWorksp
                 <SciFuncButton onClick={() => insertAtCursor('\\cosh(#?)')}>cosh</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('\\tanh(#?)')}>tanh</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('\\arctan(#?)')}>atan</SciFuncButton>
-                <SciFuncButton onClick={() => insertAtCursor('\\text{abs}(#?)')}>abs</SciFuncButton>
+                <SciFuncButton onClick={() => insertAtCursor('abs(#?)')}>abs</SciFuncButton>
 
                 <SciFuncButton onClick={() => insertAtCursor('\\log(#?)')}>log</SciFuncButton>
                 <SciFuncButton onClick={() => insertAtCursor('\\ln(#?)')}>ln</SciFuncButton>
