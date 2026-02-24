@@ -48,6 +48,7 @@ export function clearScope() {
  * @param fExpr The function expression or function object to integrate
  * @param a Lower bound of integration
  * @param b Upper bound of integration
+ * @param variable The integration variable (default 'x')
  * @param steps Number of sub-intervals (default 1000 for high precision)
  */
 function internalIntegrate(
@@ -55,19 +56,28 @@ function internalIntegrate(
   fExpr: any,
   a: number,
   b: number,
+  variable: string = "x",
   steps: number = 1000,
 ) {
-  // Determine if fExpr is a function (passed by mathjs) or a string/node to be compiled
-  const f =
-    typeof fExpr === "function"
-      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (scope: any) => fExpr(scope.x)
-      : compileMath(fExpr.toString());
+  // If steps was passed as the 4th argument instead of variable (old API support)
+  if (typeof variable === "number") {
+    steps = variable;
+    variable = "x";
+  }
+
+  const compiled =
+    typeof fExpr === "function" ? null : compileMath(fExpr.toString());
+  const f = (val: number) => {
+    if (typeof fExpr === "function") {
+      return fExpr(val);
+    }
+    return compiled!({ [variable]: val });
+  };
 
   // Width of each sub-interval
   const h = (b - a) / steps;
   // Initialize sum with boundary points f(a) and f(b)
-  let sum = f({ x: a }) + f({ x: b });
+  let sum = f(a) + f(b);
 
   /**
    * Apply Simpson's Rule formula:
@@ -76,7 +86,7 @@ function internalIntegrate(
    */
   for (let i = 1; i < steps; i++) {
     const x = a + i * h;
-    sum += f({ x }) * (i % 2 === 0 ? 2 : 4);
+    sum += f(x) * (i % 2 === 0 ? 2 : 4);
   }
 
   return (h / 3) * sum;
@@ -87,7 +97,6 @@ math.import(
   {
     integrate: internalIntegrate,
     // Add common aliases for inverse trig functions used by MathLive/LaTeX
-    // This ensures that either 'asin' or 'arcsin' can be used interchangeably
     arcsin: math.asin,
     arccos: math.acos,
     arctan: math.atan,
@@ -198,10 +207,18 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
       .replace(/÷/g, "/") // Unicode division
       .replace(/π/g, "pi"); // Unicode pi symbol
 
-    // Pattern: d/dx(expr)
+    // Handle LaTeX/MathLive derivative and integration notation
+    // Pattern: (d/dx)(expr) or d/dx(expr) or \frac{d}{dx}(expr)
     normalized = normalized.replace(
-      /d\/d([a-z])\s*\((.*?)\)/gi,
+      /(?:\(?d\)?)\/(?:\(?d([a-z])\)?)\s*\((.*?)\)/gi,
       (match, v, expr) => `derivative('${expr}', '${v}')`,
+    );
+
+    // Pattern: int_{a}^{b} (expr) dx
+    normalized = normalized.replace(
+      /int_\{?([^}^ ]*)\}?\^\{?([^}^ ]*)\}?\s*(?:\((.*?)\)|([a-z0-9^*/+-]+))\s*d([a-z])/gi,
+      (match, a, b, expr1, expr2, v) =>
+        `integrate('${expr1 || expr2}', ${a}, ${b}, '${v}')`,
     );
 
     // Implicit multiplication (e.g., 2x -> 2*x)
@@ -221,12 +238,15 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
 
     return result;
   } catch (error) {
-    console.error(
-      "Evaluation Error in math-parser:",
-      error,
-      "Expression:",
-      expression,
-    );
+    // Suppress noisy error logs during tests for expected failures
+    if (process.env.NODE_ENV !== "test") {
+      console.error(
+        "Evaluation Error in math-parser:",
+        error,
+        "Expression:",
+        expression,
+      );
+    }
     throw error;
   }
 }
@@ -261,7 +281,9 @@ export function compileMath(expression: string) {
     return (scope?: Record<string, any>) =>
       code.evaluate(scope || variableScope);
   } catch (error) {
-    console.error("Compile error:", error);
+    if (process.env.NODE_ENV !== "test") {
+      console.error("Compile error:", error);
+    }
     return () => 0;
   }
 }
@@ -287,9 +309,10 @@ export function integrate(
   expression: string,
   a: number,
   b: number,
+  variable: string = "x",
   steps: number = 1000,
 ) {
-  return internalIntegrate(expression, a, b, steps);
+  return internalIntegrate(expression, a, b, variable, steps);
 }
 
 /**
