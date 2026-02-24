@@ -20,12 +20,12 @@ export default async function SavedCalculatorPage({ params }: PageProps) {
   const data = savedSession.data as any;
 
   return (
-    <CalculatorWorkspace 
+    <CalculatorWorkspace
       sessionId={id}
       initialData={{
         display: data.display,
         equation: data.equation,
-        title: savedSession.title
+        title: savedSession.title,
       }}
     />
   );

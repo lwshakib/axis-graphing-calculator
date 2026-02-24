@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
 
@@ -21,13 +21,16 @@ export async function GET(
     return NextResponse.json(savedSession);
   } catch (error) {
     console.error("Error fetching session:", error);
-    return NextResponse.json({ error: "Failed to fetch session" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch session" },
+      { status: 500 },
+    );
   }
 }
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -47,6 +50,9 @@ export async function DELETE(
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting session:", error);
-    return NextResponse.json({ error: "Failed to delete session" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to delete session" },
+      { status: 500 },
+    );
   }
 }

@@ -82,9 +82,9 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   /* AXIS Brand Colors */
-  --logo-primary: #47CEAC;
-  --logo-secondary: #36BB9A;
-  --logo-fg: #F4F6F9;
+  --logo-primary: #47ceac;
+  --logo-secondary: #36bb9a;
+  --logo-fg: #f4f6f9;
 }
 
 .dark {
@@ -141,9 +141,9 @@
     @apply bg-muted-foreground/30 rounded-full transition-colors duration-300;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: #47CEAC; /* AXIS Primary */
+    background: #47ceac; /* AXIS Primary */
   }
-  
+
   /* Support for Firefox */
   * {
     scrollbar-width: thin;
@@ -160,5 +160,5 @@
   border-radius: 10px;
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: #47CEAC;
+  background: #47ceac;
 }

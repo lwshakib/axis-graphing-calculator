@@ -15,7 +15,11 @@ export const LogoIcon: React.FC<LogoIconProps> = ({ className, ...props }) => {
       {...props}
     >
       <g id="SVGRepo_bgCarrier" strokeWidth="0"></g>
-      <g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g>
+      <g
+        id="SVGRepo_tracerCarrier"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      ></g>
       <g id="SVGRepo_iconCarrier">
         {/* Background Circle */}
         <path
@@ -75,13 +79,20 @@ export const Logo: React.FC<LogoProps> = ({
   showText = true,
 }) => {
   return (
-    <div className={cn("flex items-center gap-2 group cursor-pointer", className)}>
-      <LogoIcon className={cn("transition-transform duration-300 group-hover:scale-110", iconClassName)} />
+    <div
+      className={cn("flex items-center gap-2 group cursor-pointer", className)}
+    >
+      <LogoIcon
+        className={cn(
+          "transition-transform duration-300 group-hover:scale-110",
+          iconClassName,
+        )}
+      />
       {showText && (
         <span
           className={cn(
             "text-2xl font-black tracking-tighter text-foreground selection:bg-primary selection:text-primary-foreground",
-            textClassName
+            textClassName,
           )}
         >
           AXIS

@@ -17,7 +17,6 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 
-
 export default function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -38,7 +37,7 @@ export default function SignInPage() {
         onError: (ctx) => {
           toast.error(ctx.error.message);
         },
-      }
+      },
     );
     if (!error) {
       toast.success("Signed in successfully!");
@@ -56,7 +55,6 @@ export default function SignInPage() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-
         <CardTitle className="text-2xl font-bold tracking-tight">
           Welcome back
         </CardTitle>

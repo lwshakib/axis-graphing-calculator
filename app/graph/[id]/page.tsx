@@ -21,12 +21,12 @@ export default async function SavedGraphPage({ params }: PageProps) {
   const data = savedSession.data as any;
 
   return (
-    <GraphWorkspace 
+    <GraphWorkspace
       sessionId={id}
       initialData={{
         equations: data.equations,
         viewport: data.viewport,
-        title: savedSession.title
+        title: savedSession.title,
       }}
     />
   );

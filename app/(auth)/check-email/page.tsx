@@ -12,12 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Mail, ArrowLeft, ExternalLink } from "lucide-react";
 import Link from "next/link";
 
-
 export default function CheckEmailPage() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-
         <div className="flex justify-center mb-4">
           <div className="rounded-full bg-primary/10 p-3">
             <Mail className="h-6 w-6 text-primary" />
@@ -27,7 +25,7 @@ export default function CheckEmailPage() {
           Check your email
         </CardTitle>
         <CardDescription className="text-base text-balance">
-          We've sent a verification link to your email address. 
+          We've sent a verification link to your email address.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-center">
@@ -35,7 +33,8 @@ export default function CheckEmailPage() {
           Please click the link in the email to verify your account.
           <br />
           <strong className="text-foreground">
-            Note: If you don't verify your email, you will not be able to log in.
+            Note: If you don't verify your email, you will not be able to log
+            in.
           </strong>
         </p>
         <Button asChild className="w-full">

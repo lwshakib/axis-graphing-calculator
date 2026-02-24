@@ -18,12 +18,11 @@ import { toast } from "sonner";
 import { Loader2, ArrowLeft, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
-
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const router = useRouter();
-  
+
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -42,20 +41,23 @@ function ResetPasswordContent() {
     }
 
     setLoading(true);
-    const { error } = await authClient.resetPassword({
-      newPassword: password,
-      token,
-    }, {
-      onRequest: () => setLoading(true),
-      onResponse: () => setLoading(false),
-      onError: (ctx) => {
-        toast.error(ctx.error.message);
+    const { error } = await authClient.resetPassword(
+      {
+        newPassword: password,
+        token,
       },
-      onSuccess: () => {
-        setSuccess(true);
-        toast.success("Password reset successfully!");
+      {
+        onRequest: () => setLoading(true),
+        onResponse: () => setLoading(false),
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+        onSuccess: () => {
+          setSuccess(true);
+          toast.success("Password reset successfully!");
+        },
       },
-    });
+    );
     setLoading(false);
   };
 
@@ -81,7 +83,6 @@ function ResetPasswordContent() {
     return (
       <Card className="border-none shadow-none bg-transparent">
         <CardHeader className="text-center space-y-1">
-
           <div className="flex justify-center mb-4">
             <div className="rounded-full bg-green-500/10 p-3">
               <CheckCircle2 className="h-6 w-6 text-green-500" />
@@ -106,7 +107,6 @@ function ResetPasswordContent() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-
         <CardTitle className="text-2xl font-bold tracking-tight">
           Reset password
         </CardTitle>
@@ -157,12 +157,14 @@ function ResetPasswordContent() {
 
 export default function ResetPasswordPage() {
   return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground animate-pulse">Loading...</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground animate-pulse">Loading...</p>
+        </div>
+      }
+    >
       <ResetPasswordContent />
     </Suspense>
   );

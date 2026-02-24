@@ -20,12 +20,12 @@ export default async function SavedScientificPage({ params }: PageProps) {
   const data = savedSession.data as any;
 
   return (
-    <ScientificWorkspace 
+    <ScientificWorkspace
       sessionId={id}
       initialData={{
         variables: data.variables,
         history: data.history,
-        title: savedSession.title
+        title: savedSession.title,
       }}
     />
   );

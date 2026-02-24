@@ -5,7 +5,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
-import { Calculator, FunctionSquare, LayoutGrid, Settings, Menu } from "lucide-react";
+import {
+  Calculator,
+  FunctionSquare,
+  LayoutGrid,
+  Settings,
+  Menu,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -40,10 +46,10 @@ export function Navbar() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed top-0 left-0 right-0 h-16 bg-background/80 backdrop-blur-md border-b z-50 flex items-center justify-between px-4 sm:px-8">
+    <nav className="fixed top-0 left-0 right-0 h-14 bg-background/80 backdrop-blur-md border-b z-50 flex items-center justify-between px-4 sm:px-8">
       <div className="flex items-center gap-8">
         <Link href="/">
-          <Logo iconClassName="w-8 h-8" textClassName="text-xl" />
+          <Logo iconClassName="w-7 h-7" textClassName="text-lg" />
         </Link>
 
         {/* Desktop Navigation */}
@@ -56,8 +62,10 @@ export function Navbar() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "relative flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition-colors duration-200 group",
-                  isActive ? "text-primary-foreground" : "text-muted-foreground hover:text-foreground"
+                  "relative flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors duration-200 group",
+                  isActive
+                    ? "text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground",
                 )}
               >
                 {isActive && (
@@ -67,8 +75,16 @@ export function Navbar() {
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                   />
                 )}
-                <Icon size={16} className={cn("transition-transform group-hover:scale-110", isActive && "relative z-10")} />
-                <span className={cn(isActive && "relative z-10")}>{item.name}</span>
+                <Icon
+                  size={14}
+                  className={cn(
+                    "transition-transform group-hover:scale-110",
+                    isActive && "relative z-10",
+                  )}
+                />
+                <span className={cn(isActive && "relative z-10")}>
+                  {item.name}
+                </span>
               </Link>
             );
           })}
@@ -88,28 +104,42 @@ export function Navbar() {
                 <Menu size={24} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl shadow-2xl backdrop-blur-xl bg-background/90 border-border/50">
+            <DropdownMenuContent
+              align="end"
+              className="w-48 p-1.5 rounded-lg shadow-2xl backdrop-blur-xl bg-background/90 border-border/50"
+            >
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
                 return (
-                  <DropdownMenuItem key={item.href} asChild className="rounded-xl mb-1">
+                  <DropdownMenuItem
+                    key={item.href}
+                    asChild
+                    className="rounded-lg mb-1"
+                  >
                     <Link
                       href={item.href}
                       className={cn(
-                        "flex items-center gap-3 w-full cursor-pointer px-3 py-2.5 transition-all",
-                        isActive ? "bg-primary text-primary-foreground" : "hover:bg-accent"
+                        "flex items-center gap-3 w-full cursor-pointer px-2.5 py-2 transition-all",
+                        isActive
+                          ? "bg-primary text-primary-foreground"
+                          : "hover:bg-accent",
                       )}
                     >
-                      <Icon size={18} className={isActive ? "text-white" : "text-muted-foreground"} />
-                      <span className="font-semibold">{item.name}</span>
+                      <Icon
+                        size={16}
+                        className={
+                          isActive ? "text-white" : "text-muted-foreground"
+                        }
+                      />
+                      <span>{item.name}</span>
                     </Link>
                   </DropdownMenuItem>
                 );
               })}
               <div className="h-px bg-muted/50 my-2 sm:hidden mx-2" />
-              <DropdownMenuItem asChild className="sm:hidden rounded-xl">
-                 <UserAccount />
+              <DropdownMenuItem asChild className="sm:hidden rounded-lg">
+                <UserAccount />
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -117,8 +147,12 @@ export function Navbar() {
 
         <ThemeToggle />
 
-        <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-primary transition-colors">
-          <Settings size={20} />
+        <Button
+          variant="ghost"
+          size="icon-sm"
+          className="text-muted-foreground hover:text-primary transition-colors"
+        >
+          <Settings size={18} />
         </Button>
       </div>
     </nav>

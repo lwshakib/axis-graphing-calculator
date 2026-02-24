@@ -15,7 +15,10 @@ export async function POST(req: NextRequest) {
   const { id, type, title, data } = await req.json();
 
   if (!type || !data) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Missing required fields" },
+      { status: 400 },
+    );
   }
 
   try {
@@ -43,7 +46,10 @@ export async function POST(req: NextRequest) {
     }
   } catch (error) {
     console.error("Error saving session:", error);
-    return NextResponse.json({ error: "Failed to save session" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to save session" },
+      { status: 500 },
+    );
   }
 }
 
@@ -61,15 +67,18 @@ export async function GET(req: NextRequest) {
 
   try {
     const sessions = await prisma.savedSession.findMany({
-      where: { 
+      where: {
         userId: session.user.id,
-        ...(type ? { type } : {})
+        ...(type ? { type } : {}),
       },
       orderBy: { updatedAt: "desc" },
     });
     return NextResponse.json(sessions);
   } catch (error) {
     console.error("Error fetching sessions:", error);
-    return NextResponse.json({ error: "Failed to fetch sessions" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to fetch sessions" },
+      { status: 500 },
+    );
   }
 }

@@ -67,12 +67,14 @@ graph TD
 ### Installation
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/lwshakib/axis-graphing-calculator.git
    cd axis-graphing-calculator
    ```
 
 2. Install dependencies:
+
    ```bash
    bun install
    # or
@@ -80,17 +82,20 @@ graph TD
    ```
 
 3. Setup environment variables:
+
    ```bash
    cp .env.example .env
    # Update .env with your database and OAuth credentials
    ```
 
 4. Initialize the database:
+
    ```bash
    bun x prisma db push
    ```
 
 5. Run the development server:
+
    ```bash
    bun dev
    # or

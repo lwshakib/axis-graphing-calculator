@@ -16,12 +16,11 @@ import { CheckCircle2, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
   const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading"
+    "loading",
   );
   const [message, setMessage] = useState("");
 
@@ -54,7 +53,6 @@ function VerifyEmailContent() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-
         <div className="flex justify-center mb-4">
           {status === "loading" && (
             <div className="rounded-full bg-primary/10 p-3">
@@ -89,9 +87,19 @@ function VerifyEmailContent() {
         )}
       </CardContent>
       <CardFooter>
-        <Button asChild variant={status === "success" ? "default" : "outline"} className="w-full">
+        <Button
+          asChild
+          variant={status === "success" ? "default" : "outline"}
+          className="w-full"
+        >
           <Link href="/sign-in" className="flex items-center justify-center">
-            {status === "success" ? "Go to Login" : <><ArrowLeft className="mr-2 h-4 w-4" /> Back to Login</>}
+            {status === "success" ? (
+              "Go to Login"
+            ) : (
+              <>
+                <ArrowLeft className="mr-2 h-4 w-4" /> Back to Login
+              </>
+            )}
           </Link>
         </Button>
       </CardFooter>
@@ -101,12 +109,14 @@ function VerifyEmailContent() {
 
 export default function VerifyEmailPage() {
   return (
-    <Suspense fallback={
-      <div className="flex flex-col items-center justify-center space-y-4">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <p className="text-muted-foreground animate-pulse">Loading...</p>
-      </div>
-    }>
+    <Suspense
+      fallback={
+        <div className="flex flex-col items-center justify-center space-y-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-muted-foreground animate-pulse">Loading...</p>
+        </div>
+      }
+    >
       <VerifyEmailContent />
     </Suspense>
   );

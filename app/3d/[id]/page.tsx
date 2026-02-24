@@ -20,12 +20,12 @@ export default async function SavedThreeDPage({ params }: PageProps) {
   const data = savedSession.data as any;
 
   return (
-    <ThreeDWorkspace 
+    <ThreeDWorkspace
       sessionId={id}
       initialData={{
         vectors: data.vectors,
         surfaces: data.surfaces,
-        title: savedSession.title
+        title: savedSession.title,
       }}
     />
   );

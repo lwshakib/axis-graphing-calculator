@@ -8,8 +8,9 @@ import NextTopLoader from "nextjs-toploader";
 
 export const metadata: Metadata = {
   title: "AXIS | Advanced Graphing & Scientific Calculator",
-  description: "Precision meets elegance. AXIS is a powerful suite of mathematical tools for students, engineers, and researchers.",
-   icons: {
+  description:
+    "Precision meets elegance. AXIS is a powerful suite of mathematical tools for students, engineers, and researchers.",
+  icons: {
     icon: [
       {
         url: "/favicon_io/favicon-16x16.png",
@@ -53,7 +54,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <NextTopLoader 
+          <NextTopLoader
             color="var(--primary)"
             initialPosition={0.08}
             crawlSpeed={200}
@@ -65,9 +66,7 @@ export default function RootLayout({
             shadow="0 0 10px var(--primary),0 0 5px var(--primary)"
           />
           <Navbar />
-          <div className="pt-16">
-            {children}
-          </div>
+          <div className="pt-16">{children}</div>
           <Toaster />
         </ThemeProvider>
       </body>

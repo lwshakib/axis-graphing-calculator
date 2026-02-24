@@ -30,6 +30,7 @@ First off, thank you for considering contributing to AXIS! It's people like you 
 ## 🧪 Testing
 
 Before submitting a PR, please ensure:
+
 - The project builds successfully: `npm run build` or `bun run build`.
 - No linting errors exist.
 - New features are tested against high-scale zooming and complex mathematical expressions.

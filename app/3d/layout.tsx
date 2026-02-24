@@ -2,7 +2,8 @@ import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "3D Plotter | AXIS",
-  description: "Visualize vectors and surfaces in a high-performance 3D coordinate system.",
+  description:
+    "Visualize vectors and surfaces in a high-performance 3D coordinate system.",
 };
 
 export default function ThreeDLayout({
@@ -10,9 +11,5 @@ export default function ThreeDLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return (
-    <>
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }

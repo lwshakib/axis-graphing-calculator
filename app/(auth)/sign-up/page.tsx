@@ -18,7 +18,6 @@ import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,7 +45,7 @@ export default function SignUpPage() {
           toast.success("Account created successfully!");
           router.push("/check-email");
         },
-      }
+      },
     );
     setLoading(false);
   };
@@ -61,7 +60,6 @@ export default function SignUpPage() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-
         <CardTitle className="text-2xl font-bold tracking-tight">
           Create an account
         </CardTitle>

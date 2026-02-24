@@ -17,7 +17,6 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Loader2, ArrowLeft, Mail } from "lucide-react";
 
-
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -26,20 +25,23 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await authClient.requestPasswordReset({
-      email,
-      redirectTo: "/reset-password",
-    }, {
-      onRequest: () => setLoading(true),
-      onResponse: () => setLoading(false),
-      onError: (ctx) => {
-        toast.error(ctx.error.message);
+    const { error } = await authClient.requestPasswordReset(
+      {
+        email,
+        redirectTo: "/reset-password",
       },
-      onSuccess: () => {
-        setEmailSent(true);
-        toast.success("Password reset email sent!");
+      {
+        onRequest: () => setLoading(true),
+        onResponse: () => setLoading(false),
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+        onSuccess: () => {
+          setEmailSent(true);
+          toast.success("Password reset email sent!");
+        },
       },
-    });
+    );
     setLoading(false);
   };
 
@@ -47,7 +49,6 @@ export default function ForgotPasswordPage() {
     return (
       <Card className="border-none shadow-none bg-transparent">
         <CardHeader className="text-center space-y-1">
-
           <div className="flex justify-center mb-4">
             <div className="rounded-full bg-primary/10 p-3">
               <Mail className="h-6 w-6 text-primary" />
@@ -57,7 +58,8 @@ export default function ForgotPasswordPage() {
             Check your email
           </CardTitle>
           <CardDescription className="text-base">
-            We've sent a password reset link to <span className="font-medium text-foreground">{email}</span>.
+            We've sent a password reset link to{" "}
+            <span className="font-medium text-foreground">{email}</span>.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
@@ -79,12 +81,12 @@ export default function ForgotPasswordPage() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-
         <CardTitle className="text-2xl font-bold tracking-tight">
           Forgot password?
         </CardTitle>
         <CardDescription>
-          Enter your email address and we'll send you a link to reset your password.
+          Enter your email address and we'll send you a link to reset your
+          password.
         </CardDescription>
       </CardHeader>
       <CardContent>
