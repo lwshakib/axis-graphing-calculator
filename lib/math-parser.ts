@@ -228,10 +228,20 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
     normalized = normalized.replace(/text\{(.*?)\}/g, "$1");
     normalized = normalized.replace(/operatorname\{(.*?)\}/g, "$1");
 
-    console.log("Final Normalized Expression:", normalized);
-    return math.evaluate(normalized, scope || variableScope);
+    const result = math.evaluate(normalized, scope || variableScope);
+
+    // If the result is a mathjs Node (e.g., from derivative), evaluate it to get a value
+    if (result && typeof result === "object" && result.isNode) {
+      try {
+        return result.evaluate(scope || variableScope);
+      } catch (err) {
+        // If evaluation fails (e.g., missing variables), return the symbolic Node
+        return result;
+      }
+    }
+
+    return result;
   } catch (error) {
-    console.error("Math evaluation error:", error, "Original:", expression);
     throw error;
   }
 }
