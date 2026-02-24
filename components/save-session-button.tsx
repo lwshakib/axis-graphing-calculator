@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Save, LogIn, Loader2 } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -17,7 +18,7 @@ import { authClient } from "@/lib/auth-client";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { AuthDialog } from "@/components/auth-dialog";
+
 
 interface SaveSessionButtonProps {
   type: "graph" | "calculator" | "scientific" | "3d";
@@ -159,18 +160,16 @@ export function SaveSessionButton({
           </DialogFooter>
         ) : (
           <div className="flex flex-col gap-4">
-            <AuthDialog 
-              triggerAsChild={false} 
-              onSuccess={() => handleSave()}
-              onSocialLogin={prepareAutoSave}
-            >
-              <Button 
+            <Button 
+                asChild
                 className="h-14 w-full rounded-2xl text-lg font-bold flex gap-3 bg-[#47CEAC] hover:bg-[#36BB9A] text-white shadow-xl shadow-[#47CEAC]/20 border-none transition-all active:scale-[0.98]" 
+                onClick={prepareAutoSave}
               >
-                <LogIn size={20} />
-                Sign in to Save
+                <Link href={`/sign-in?callbackURL=${encodeURIComponent(window.location.pathname)}`}>
+                  <LogIn size={20} />
+                  Sign in to Save
+                </Link>
               </Button>
-            </AuthDialog>
             <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-[0.1em] px-4">
               Your data will be automatically saved after you sign in.
             </p>

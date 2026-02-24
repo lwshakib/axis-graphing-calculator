@@ -11,10 +11,10 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { History, LogOut, User as UserIcon, LogIn } from "lucide-react";
+import { History, LogOut, User as UserIcon } from "lucide-react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { AuthDialog } from "@/components/auth-dialog";
+
 
 export function UserAccount() {
   const { data: session, isPending } = authClient.useSession();
@@ -51,23 +51,21 @@ export function UserAccount() {
   if (!session) {
     return (
       <div className="flex items-center gap-2">
-        <AuthDialog>
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="font-semibold px-4"
-          >
-            Log In
-          </Button>
-        </AuthDialog>
-        <AuthDialog>
-          <Button 
-            size="sm" 
-            className="font-bold px-4 rounded-full shadow-lg shadow-primary/10 transition-all hover:scale-105"
-          >
-            Sign Up
-          </Button>
-        </AuthDialog>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="font-semibold px-4"
+          asChild
+        >
+          <Link href="/sign-in">Log In</Link>
+        </Button>
+        <Button 
+          size="sm" 
+          className="font-bold px-4 rounded-full shadow-lg shadow-primary/10 transition-all hover:scale-105"
+          asChild
+        >
+          <Link href="/sign-up">Sign Up</Link>
+        </Button>
       </div>
     );
   }

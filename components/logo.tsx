@@ -65,24 +65,28 @@ interface LogoProps {
   className?: string;
   iconClassName?: string;
   textClassName?: string;
+  showText?: boolean;
 }
 
 export const Logo: React.FC<LogoProps> = ({
   className,
   iconClassName,
   textClassName,
+  showText = true,
 }) => {
   return (
     <div className={cn("flex items-center gap-2 group cursor-pointer", className)}>
       <LogoIcon className={cn("transition-transform duration-300 group-hover:scale-110", iconClassName)} />
-      <span
-        className={cn(
-          "text-2xl font-black tracking-tighter text-foreground selection:bg-primary selection:text-primary-foreground",
-          textClassName
-        )}
-      >
-        AXIS
-      </span>
+      {showText && (
+        <span
+          className={cn(
+            "text-2xl font-black tracking-tighter text-foreground selection:bg-primary selection:text-primary-foreground",
+            textClassName
+          )}
+        >
+          AXIS
+        </span>
+      )}
     </div>
   );
 };
