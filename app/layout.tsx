@@ -1,11 +1,20 @@
 import type { Metadata } from "next";
 
+/**
+ * RootLayout: The top-level layout component for the entire application.
+ * Defines global fonts, metadata, theme providers, and shared UI elements 
+ * like the Navbar and Toast notifications.
+ */
+
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
 import { Navbar } from "@/components/navbar";
-import NextTopLoader from "nextjs-toploader";
+import NextTopLoader from "nextjs-toploader"; // Progress bar for navigation
 
+/**
+ * Global Metadata Configuration for SEO and Browser Branding.
+ */
 export const metadata: Metadata = {
   title: "AXIS | Advanced Graphing & Scientific Calculator",
   description:
@@ -48,12 +57,17 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <head />
       <body>
+        {/*
+          ThemeProvider manages dark/light mode persistence and avoids 
+          content flickering during hydration by using the 'class' attribute.
+        */}
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
+          {/* Visual progress bar at the top of the viewport during route transitions */}
           <NextTopLoader
             color="var(--primary)"
             initialPosition={0.08}
@@ -65,8 +79,14 @@ export default function RootLayout({
             speed={200}
             shadow="0 0 10px var(--primary),0 0 5px var(--primary)"
           />
+          
+          {/* Global Navbar shared across all routes */}
           <Navbar />
+          
+          {/* Main content area with top padding to clear the fixed Navbar */}
           <div className="pt-16">{children}</div>
+          
+          {/* Sonner Toaster for application-wide notifications */}
           <Toaster />
         </ThemeProvider>
       </body>

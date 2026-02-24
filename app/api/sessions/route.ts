@@ -3,6 +3,18 @@ import { auth } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { headers } from "next/headers";
 
+/**
+ * POST /api/sessions
+ * 
+ * An idempotent endpoint for persisting mathematical workspaces.
+ * Supports both creating new sessions and updating existing ones based on the presence of an 'id'.
+ * 
+ * Request Body:
+ * - id: Optional UUID (if provided, triggers an update)
+ * - type: 'graph' | 'calculator' | 'scientific' | '3d'
+ * - title: Display name for the session
+ * - data: JSON payload representing the workspace state
+ */
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -23,7 +35,10 @@ export async function POST(req: NextRequest) {
 
   try {
     if (id) {
-      // Update existing
+      /**
+       * Update Logic:
+       * Ensures the user owns the record before allowing mutation (RBAC).
+       */
       const updated = await prisma.savedSession.update({
         where: { id, userId: session.user.id },
         data: {
@@ -33,7 +48,10 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json(updated);
     } else {
-      // Create new
+      /**
+       * Initialization Logic:
+       * Creates a new persistent record linked to the authenticated user.
+       */
       const created = await prisma.savedSession.create({
         data: {
           userId: session.user.id,
@@ -53,6 +71,16 @@ export async function POST(req: NextRequest) {
   }
 }
 
+/**
+ * GET /api/sessions
+ * 
+ * Multi-purpose retrieval endpoint. 
+ * Returns a list of sessions owned by the authenticated user, 
+ * optionally filtered by workspace type.
+ * 
+ * Query Parameters:
+ * - type (Optional): Filter by 'graph', 'calculator', etc.
+ */
 export async function GET(req: NextRequest) {
   const session = await auth.api.getSession({
     headers: await headers(),
@@ -71,7 +99,7 @@ export async function GET(req: NextRequest) {
         userId: session.user.id,
         ...(type ? { type } : {}),
       },
-      orderBy: { updatedAt: "desc" },
+      orderBy: { updatedAt: "desc" }, // Most recent first
     });
     return NextResponse.json(sessions);
   } catch (error) {

@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Account Page: User profile and security management.
+ * Provides tools for updating profile info, managing OAuth connections,
+ * changing passwords, revoking active sessions, and deleting the account.
+ * Integrates with better-auth for client-side authentication management.
+ */
+
 import { useEffect, useState } from "react";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -28,6 +35,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+// --- Internal Interfaces ---
 
 interface SessionItem {
   id: string;
@@ -48,22 +58,23 @@ interface UserWithProvider {
 }
 
 export default function AccountPage() {
+  // --- Auth State ---
   const {
     data: session,
     isPending: isSessionPending,
     refetch: refetchSession,
   } = authClient.useSession();
 
-  // Local state for fetched data instead of reactive hooks
+  // --- Domain Data State ---
   const [sessions, setSessions] = useState<SessionItem[]>([]);
   const [accounts, setAccounts] = useState<AccountItem[]>([]);
   const [isSessionsLoading, setIsSessionsLoading] = useState(true);
   const [isAccountsLoading, setIsAccountsLoading] = useState(true);
+  
+  // --- Form & Action State ---
   const [revokingId, setRevokingId] = useState<string | null>(null);
-
   const [name, setName] = useState("");
   const [isUpdatingName, setIsUpdatingName] = useState(false);
-
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -72,15 +83,14 @@ export default function AccountPage() {
 
   const router = useRouter();
 
-  // Manual fetching logic as per user's provided example
+  /** Data Fetcher: Lists all active sessions for the user. */
   const fetchSessions = async () => {
     setIsSessionsLoading(true);
     try {
+      // better-auth-client listSessions helper
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = await (authClient as any).listSessions();
-      if (res.data) {
-        setSessions(res.data);
-      }
+      if (res.data) setSessions(res.data);
     } catch (err) {
       console.error("Failed to fetch sessions", err);
     } finally {
@@ -88,14 +98,13 @@ export default function AccountPage() {
     }
   };
 
+  /** Data Fetcher: Lists linked third-party accounts (Google, etc.). */
   const fetchAccounts = async () => {
     setIsAccountsLoading(true);
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = await (authClient as any).listAccounts();
-      if (res.data) {
-        setAccounts(res.data);
-      }
+      if (res.data) setAccounts(res.data);
     } catch (err) {
       console.error("Failed to fetch accounts", err);
     } finally {
@@ -103,6 +112,7 @@ export default function AccountPage() {
     }
   };
 
+  // Sync profile data when the session hydrates
   useEffect(() => {
     if (session?.user) {
       setName(session.user.name || "");
@@ -111,6 +121,7 @@ export default function AccountPage() {
     }
   }, [session]);
 
+  // Loading indicator for initial hydration
   if (isSessionPending) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-zinc-950">
@@ -119,29 +130,25 @@ export default function AccountPage() {
     );
   }
 
+  // Redirect to sign-in if no active session
   if (!session) {
     router.push("/sign-in");
     return null;
   }
 
   const user = session.user;
-  const initials = user.name
-    ? user.name
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-    : "U";
+  const initials = user.name ? user.name.split(" ").map((n) => n[0]).join("").toUpperCase() : "U";
 
+  // --- Profile Actions ---
+
+  /** Updates the user's display name. */
   const handleUpdateName = async () => {
     if (!name.trim()) return;
     setIsUpdatingName(true);
     try {
-      await authClient.updateUser({
-        name: name.trim(),
-      });
+      await authClient.updateUser({ name: name.trim() });
       toast.success("Profile updated");
-      refetchSession();
+      refetchSession(); // Refresh local session cache
     } catch {
       toast.error("Failed to update profile");
     } finally {
@@ -149,6 +156,7 @@ export default function AccountPage() {
     }
   };
 
+  /** Updates user credentials. */
   const handleUpdatePassword = async () => {
     if (!currentPassword || !newPassword || newPassword !== confirmPassword) {
       toast.error("Please fill all fields and ensure passwords match");
@@ -167,21 +175,19 @@ export default function AccountPage() {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Failed to update password";
+      const message = error instanceof Error ? error.message : "Failed to update password";
       toast.error(message);
     } finally {
       setIsUpdatingPassword(false);
     }
   };
 
+  /** Logs out another active device session by ID. */
   const handleRevokeSession = async (id: string) => {
     setRevokingId(id);
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (authClient as any).revokeSession({
-        id,
-      });
+      await (authClient as any).revokeSession({ id });
       toast.success("Session revoked");
       fetchSessions();
     } catch {
@@ -191,6 +197,7 @@ export default function AccountPage() {
     }
   };
 
+  /** Initiates OAuth linking flow. */
   const handleLinkAccount = async (provider: "google") => {
     try {
       await authClient.signIn.social({
@@ -202,6 +209,7 @@ export default function AccountPage() {
     }
   };
 
+  /** Destructive action to permanently remove the user and all data. */
   const handleDeleteAccount = async () => {
     setIsDeleting(true);
     try {
@@ -222,12 +230,11 @@ export default function AccountPage() {
     }
   };
 
+  /** Unlinks a connected OAuth provider. */
   const handleUnlinkAccount = async (id: string) => {
     try {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      await (authClient as any).unlinkAccount({
-        accountRecordId: id,
-      });
+      await (authClient as any).unlinkAccount({ accountRecordId: id });
       toast.success("Account unlinked");
       fetchAccounts();
     } catch {
@@ -235,11 +242,9 @@ export default function AccountPage() {
     }
   };
 
-  // Improved linked check that includes the current session's provider
+  /** Helper to determine if a specific provider is already used by this user. */
   const isProviderLinked = (provider: string) => {
-    // Check if the current user's initial provider matches
     if ((user as UserWithProvider).provider === provider) return true;
-    // Check the accounts table
     return accounts?.some((acc) => acc.providerId === provider);
   };
 
@@ -247,43 +252,35 @@ export default function AccountPage() {
     <div className="bg-background text-foreground selection:bg-primary/30 min-h-screen font-sans transition-colors duration-500">
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
-          {/* Sidebar / Profile Info */}
+          
+          {/* --- Navigation & Profile Sidebar --- */}
           <div className="space-y-8 lg:col-span-4">
             <div className="sticky top-12">
               <div className="group relative mx-auto h-32 w-32 lg:mx-0">
                 <Avatar className="border-secondary ring-border h-32 w-32 border-4 shadow-2xl ring-1 transition-transform duration-500 group-hover:scale-105">
                   <AvatarImage src={user.image || ""} alt={user.name || ""} />
-                  <AvatarFallback className="bg-secondary text-3xl font-bold">
-                    {initials}
-                  </AvatarFallback>
+                  <AvatarFallback className="bg-secondary text-3xl font-bold">{initials}</AvatarFallback>
                 </Avatar>
               </div>
               <div className="mt-6 text-center lg:text-left">
-                <h1 className="text-2xl font-bold tracking-tight">
-                  {user.name}
-                </h1>
+                <h1 className="text-2xl font-bold tracking-tight">{user.name}</h1>
                 <p className="mt-1 text-sm text-zinc-500">{user.email}</p>
               </div>
 
+              {/* Sidebar Quick-Scroll Navigation */}
               <div className="mt-12 hidden space-y-2 lg:block">
-                {["Profile", "Security", "Sessions", "Delete Account"].map(
-                  (item) => (
+                {["Profile", "Security", "Sessions", "Delete Account"].map((item) => (
                     <button
                       key={item}
-                      className={
-                        item === "Delete Account"
-                          ? "text-destructive hover:bg-destructive/10 w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all"
-                          : "text-muted-foreground hover:text-foreground hover:bg-secondary w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all"
-                      }
+                      className={cn(
+                        "w-full rounded-lg px-4 py-2 text-left text-sm font-medium transition-all",
+                         item === "Delete Account" 
+                           ? "text-destructive hover:bg-destructive/10" 
+                           : "text-muted-foreground hover:text-foreground hover:bg-secondary"
+                      )}
                       onClick={() => {
-                        const el = document.getElementById(
-                          item.toLowerCase().replace(" ", "-"),
-                        );
-                        if (el)
-                          el.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                          });
+                        const el = document.getElementById(item.toLowerCase().replace(" ", "-"));
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
                       }}
                     >
                       {item}
@@ -294,27 +291,20 @@ export default function AccountPage() {
             </div>
           </div>
 
-          {/* Main Content Sections */}
+          {/* --- Main Settings Stream --- */}
           <div className="space-y-20 pb-40 lg:col-span-8">
-            {/* Profile Section */}
+            
+            {/* Section: Profile Settings */}
             <section id="profile" className="scroll-mt-12 space-y-8">
               <div className="border-border border-b pb-4">
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Profile Settings
-                </h2>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  Manage your public information and connected accounts.
-                </p>
+                <h2 className="text-lg font-semibold tracking-tight">Profile Settings</h2>
+                <p className="text-muted-foreground mt-1 text-xs">Manage your public information and connected accounts.</p>
               </div>
 
               <div className="space-y-10">
+                {/* Display Name Form */}
                 <div className="grid gap-3">
-                  <Label
-                    htmlFor="name"
-                    className="text-muted-foreground text-xs font-bold"
-                  >
-                    Display Name
-                  </Label>
+                  <Label htmlFor="name" className="text-muted-foreground text-xs font-bold">Display Name</Label>
                   <div className="flex gap-4">
                     <Input
                       id="name"
@@ -329,81 +319,49 @@ export default function AccountPage() {
                       variant="default"
                       className="hover:shadow-primary/20 h-11 rounded-xl px-6 font-bold shadow-lg transition-all"
                     >
-                      {isUpdatingName ? (
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      ) : (
-                        "Update"
-                      )}
+                      {isUpdatingName ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Update"}
                     </Button>
                   </div>
                 </div>
 
+                {/* OAuth Provider Management */}
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <Label className="text-muted-foreground text-xs font-bold">
-                      Connected Accounts
-                    </Label>
-                    {isAccountsLoading && (
-                      <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />
-                    )}
+                    <Label className="text-muted-foreground text-xs font-bold">Connected Accounts</Label>
+                    {isAccountsLoading && <Loader2 className="text-muted-foreground h-4 w-4 animate-spin" />}
                   </div>
 
                   <div className="grid gap-3">
                     {isAccountsLoading ? (
                       <div className="grid gap-3">
                         {[1, 2].map((i) => (
-                          <div
-                            key={i}
-                            className="bg-secondary/30 border-border/60 h-20 animate-pulse rounded-2xl border"
-                          />
+                           <div key={i} className="bg-secondary/30 border-border/60 h-20 animate-pulse rounded-2xl border" />
                         ))}
                       </div>
                     ) : (
                       ["google"].map((provider) => {
                         const isLinked = isProviderLinked(provider);
                         return (
-                          <div
-                            key={provider}
-                            className="bg-secondary/30 border-border/60 hover:bg-secondary/50 flex items-center justify-between rounded-2xl border p-4 transition-all"
-                          >
+                          <div key={provider} className="bg-secondary/30 border-border/60 hover:bg-secondary/50 flex items-center justify-between rounded-2xl border p-4 transition-all">
                             <div className="flex items-center gap-4">
                               <div className="bg-background border-border flex h-10 w-10 items-center justify-center rounded-xl border shadow-sm">
                                 {provider === "google" && (
-                                  <Image
-                                    src="https://www.svgrepo.com/show/475656/google-color.svg"
-                                    alt="google"
-                                    width={20}
-                                    height={20}
-                                    className="h-5 w-5"
-                                  />
+                                  <Image src="https://www.svgrepo.com/show/475656/google-color.svg" alt="google" width={20} height={20} className="h-5 w-5" />
                                 )}
                               </div>
                               <div>
-                                <p className="text-foreground text-xs font-bold capitalize">
-                                  {provider}
-                                </p>
-                                <p className="text-muted-foreground text-[10px] font-medium">
-                                  {isLinked
-                                    ? "Connected and verified"
-                                    : "Not connected"}
-                                </p>
+                                <p className="text-foreground text-xs font-bold capitalize">{provider}</p>
+                                <p className="text-muted-foreground text-[10px] font-medium">{isLinked ? "Connected and verified" : "Not connected"}</p>
                               </div>
                             </div>
                             {isLinked ? (
                               <div className="flex items-center gap-2">
-                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-500">
-                                  Active
-                                </span>
-                                {accounts?.some(
-                                  (a) => a.providerId === provider,
-                                ) && (
+                                <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[9px] font-bold text-emerald-600 dark:text-emerald-500">Active</span>
+                                {accounts?.some((a) => a.providerId === provider) && (
                                   <Button
-                                    variant="ghost"
-                                    size="sm"
+                                    variant="ghost" size="sm"
                                     onClick={() => {
-                                      const acc = accounts?.find(
-                                        (a) => a.providerId === provider,
-                                      );
+                                      const acc = accounts?.find((a) => a.providerId === provider);
                                       if (acc) handleUnlinkAccount(acc.id);
                                     }}
                                     className="text-destructive hover:bg-destructive/10 h-8 rounded-lg px-3 text-[10px] font-bold"
@@ -414,11 +372,8 @@ export default function AccountPage() {
                               </div>
                             ) : (
                               <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() =>
-                                  handleLinkAccount(provider as "google")
-                                }
+                                variant="outline" size="sm"
+                                onClick={() => handleLinkAccount(provider as "google")}
                                 className="border-border bg-background hover:bg-secondary h-8 rounded-lg px-4 text-[10px] font-bold"
                               >
                                 Connect
@@ -433,22 +388,16 @@ export default function AccountPage() {
               </div>
             </section>
 
-            {/* Security Section */}
+            {/* Section: Account Security */}
             <section id="security" className="scroll-mt-12 space-y-8">
               <div className="border-border border-b pb-4">
-                <h2 className="text-lg font-semibold tracking-tight">
-                  Account Security
-                </h2>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  Change your password and secure your identity.
-                </p>
+                <h2 className="text-lg font-semibold tracking-tight">Account Security</h2>
+                <p className="text-muted-foreground mt-1 text-xs">Change your password and secure your identity.</p>
               </div>
 
               <div className="max-w-md space-y-5">
                 <div className="grid gap-2">
-                  <Label className="text-muted-foreground text-[10px] font-bold">
-                    Current Password
-                  </Label>
+                  <Label className="text-muted-foreground text-[10px] font-bold">Current Password</Label>
                   <Input
                     type="password"
                     value={currentPassword}
@@ -457,9 +406,7 @@ export default function AccountPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label className="text-muted-foreground text-[10px] font-bold">
-                    New Password
-                  </Label>
+                  <Label className="text-muted-foreground text-[10px] font-bold">New Password</Label>
                   <Input
                     type="password"
                     value={newPassword}
@@ -468,9 +415,7 @@ export default function AccountPage() {
                   />
                 </div>
                 <div className="grid gap-2">
-                  <Label className="text-muted-foreground text-[10px] font-bold">
-                    Confirm New Password
-                  </Label>
+                  <Label className="text-muted-foreground text-[10px] font-bold">Confirm New Password</Label>
                   <Input
                     type="password"
                     value={confirmPassword}
@@ -480,31 +425,23 @@ export default function AccountPage() {
                 </div>
                 <Button
                   onClick={handleUpdatePassword}
-                  disabled={
-                    isUpdatingPassword || !currentPassword || !newPassword
-                  }
+                  disabled={isUpdatingPassword || !currentPassword || !newPassword}
                   className="hover:shadow-primary/20 mt-2 h-11 w-full rounded-xl font-bold shadow-lg transition-all"
                 >
-                  {isUpdatingPassword && (
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  )}
+                  {isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                   Update Password
                 </Button>
               </div>
             </section>
 
-            {/* Sessions Section */}
+            {/* Section: Active Sessions Management */}
             <section id="sessions" className="scroll-mt-12 space-y-8">
               <div className="border-b border-zinc-900 pb-4">
                 <h2 className="flex items-center gap-3 text-lg font-semibold tracking-tight">
                   Active Sessions
-                  {isSessionsLoading && (
-                    <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />
-                  )}
+                  {isSessionsLoading && <Loader2 className="h-4 w-4 animate-spin text-zinc-500" />}
                 </h2>
-                <p className="mt-1 text-xs text-zinc-500">
-                  Devices that are currently logged into your account.
-                </p>
+                <p className="mt-1 text-xs text-zinc-500">Devices that are currently logged into your account.</p>
               </div>
 
               <div className="grid gap-3">
@@ -514,10 +451,7 @@ export default function AccountPage() {
                   </div>
                 ) : sessions.length > 0 ? (
                   sessions.map((s) => (
-                    <div
-                      key={s.id}
-                      className="border-border/60 bg-secondary/30 group hover:bg-secondary/50 flex items-center justify-between rounded-2xl border p-5 backdrop-blur-sm transition-all"
-                    >
+                    <div key={s.id} className="border-border/60 bg-secondary/30 group hover:bg-secondary/50 flex items-center justify-between rounded-2xl border p-5 backdrop-blur-sm transition-all">
                       <div className="flex items-center gap-5">
                         <div className="bg-background border-border flex h-12 w-12 items-center justify-center rounded-2xl border shadow-sm">
                           {s.userAgent?.toLowerCase().includes("mobile") ? (
@@ -528,35 +462,22 @@ export default function AccountPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-3">
-                            <p className="text-foreground text-sm font-bold">
-                              {s.userAgent?.split(")")[0]?.split("(")[1] ||
-                                "Modern Browser"}
-                            </p>
+                            <p className="text-foreground text-sm font-bold">{s.userAgent?.split(")")[0]?.split("(")[1] || "Modern Browser"}</p>
                             {s.id === session.session.id && (
-                              <span className="bg-primary/10 text-primary border-primary/20 rounded-full border px-2 py-0.5 text-[9px] font-bold">
-                                Current
-                              </span>
+                              <span className="bg-primary/10 text-primary border-primary/20 rounded-full border px-2 py-0.5 text-[9px] font-bold">Current</span>
                             )}
                           </div>
-                          <p className="mt-0.5 text-[10px] font-medium text-zinc-500 opacity-80">
-                            {s.ipAddress || "Active Connection"} • Last active
-                            recently
-                          </p>
+                          <p className="mt-0.5 text-[10px] font-medium text-zinc-500 opacity-80">{s.ipAddress || "Active Connection"} • Last active recently</p>
                         </div>
                       </div>
                       {s.id !== session.session.id && (
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="ghost" size="sm"
                           onClick={() => handleRevokeSession(s.id)}
                           disabled={revokingId === s.id}
                           className="text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-xl px-4"
                         >
-                          {revokingId === s.id ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                          ) : (
-                            <LogOut className="mr-2 h-4 w-4" />
-                          )}
+                          {revokingId === s.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
                           Revoke
                         </Button>
                       )}
@@ -567,72 +488,42 @@ export default function AccountPage() {
                     <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-zinc-900">
                       <Monitor className="h-6 w-6 text-zinc-600" />
                     </div>
-                    <h3 className="text-sm font-bold text-zinc-400">
-                      No active sessions found
-                    </h3>
-                    <p className="mt-1 max-w-[200px] text-xs text-zinc-600">
-                      Only the current session is currently registered in our
-                      security logs.
-                    </p>
+                    <h3 className="text-sm font-bold text-zinc-400">No active sessions found</h3>
+                    <p className="mt-1 max-w-[200px] text-xs text-zinc-600">Only the current session is currently registered in our security logs.</p>
                   </div>
                 )}
               </div>
             </section>
 
-            {/* Danger Zone */}
-            <section
-              id="delete-account"
-              className="scroll-mt-12 pt-16 border-t border-border/10"
-            >
+            {/* Section: Danger Zone (Account Deletion) */}
+            <section id="delete-account" className="scroll-mt-12 pt-16 border-t border-border/10">
               <div className="p-8 rounded-2xl border border-destructive/20 bg-destructive/[0.03] flex flex-col md:flex-row items-center justify-between gap-8">
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold text-destructive flex items-center gap-2">
                     <AlertTriangle size={24} />
                     Delete Account
                   </h3>
-                  <p className="text-sm text-muted-foreground max-w-md">
-                    Once you delete your account, there is no going back. Please
-                    be certain. All your sessions, calculations, and profile
-                    data will be permanently removed.
-                  </p>
+                  <p className="text-sm text-muted-foreground max-w-md">Once you delete your account, there is no going back. All sessions and data will be permanently removed.</p>
                 </div>
 
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
-                    <Button
-                      variant="destructive"
-                      className="rounded-xl px-8 font-bold shadow-lg shadow-destructive/10 h-11 transition-all hover:scale-[1.02]"
-                    >
+                    <Button variant="destructive" className="rounded-xl px-8 font-bold shadow-lg shadow-destructive/10 h-11 transition-all hover:scale-[1.02]">
                       Delete Account
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent className="rounded-3xl border-border bg-background backdrop-blur-xl">
                     <AlertDialogHeader className="space-y-3">
-                      <AlertDialogTitle className="text-xl font-black tracking-tight">
-                        Delete Account
-                      </AlertDialogTitle>
-                      <AlertDialogDescription className="text-muted-foreground text-sm">
-                        This action will permanently delete your account and all
-                        associated data. You will lose access to all your saved
-                        graphing sessions and calculations.
-                      </AlertDialogDescription>
+                      <AlertDialogTitle className="text-xl font-black tracking-tight">Delete Account</AlertDialogTitle>
+                      <AlertDialogDescription className="text-muted-foreground text-sm">This action is permanent and cannot be undone. You will lose all saved sessions.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter className="mt-6 gap-3">
-                      <AlertDialogCancel className="rounded-xl border-border bg-secondary/50 font-bold h-11">
-                        Cancel
-                      </AlertDialogCancel>
+                      <AlertDialogCancel className="rounded-xl border-border bg-secondary/50 font-bold h-11">Cancel</AlertDialogCancel>
                       <AlertDialogAction
                         onClick={handleDeleteAccount}
                         className="bg-destructive hover:bg-destructive/90 rounded-xl font-bold px-8 h-11 shadow-lg shadow-destructive/20"
                       >
-                        {isDeleting ? (
-                          <span className="flex items-center gap-2">
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            Deleting...
-                          </span>
-                        ) : (
-                          "Confirm Deletion"
-                        )}
+                        {isDeleting ? <span className="flex items-center gap-2"><Loader2 className="h-4 w-4 animate-spin" />Deleting...</span> : "Confirm Deletion"}
                       </AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>

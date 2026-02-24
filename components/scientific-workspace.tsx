@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * ScientificWorkspace component: An advanced mathematical environment.
+ * Features natural math input via MathLive, matrix operations, 
+ * persistent variable assignments, and calculation history.
+ * Designed for complex algebra, calculus, and matrix mathematics.
+ */
+
 import React, { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -32,23 +39,37 @@ import {
 import { SaveSessionButton } from "@/components/save-session-button";
 import { useRouter } from "next/navigation";
 
-// MathLive for Natural Display Input
+// --- MathLive Integration ---
+/**
+ * MathLive provides an interactive mathematical keyboard and WYSIWYG editor.
+ * It uses the <math-field> custom element. We import the library globally once.
+ */
 import "mathlive";
 import { MathfieldElement } from "mathlive";
 
+/**
+ * React wrapper for the <math-field> web component.
+ * Uses forwardRef to allow direct access to the underlying DOM node 
+ * (essential for focus management and direct value manipulation).
+ */
 const MathField = React.forwardRef<MathfieldElement, Record<string, unknown>>(
   (props, ref) => {
-    // @ts-expect-error math-field is a web component from MathLive
+    // @ts-expect-error math-field is a custom web component not defined in default React types
     return <math-field {...props} ref={ref} />;
   },
 );
 MathField.displayName = "MathField";
 
+/**
+ * Helper component to render 2D arrays (matrices) with high-fidelity bracket styling.
+ * Supports both raw nested arrays and mathjs Matrix objects.
+ */
 function MatrixRenderer({
   data,
 }: {
   data: unknown[][] | { isMatrix?: boolean; toArray?: () => unknown[][] };
 }) {
+  // Normalize the data input into a standard 2D array
   const matrix: unknown[][] = Array.isArray(data)
     ? data
     : (data as { toArray?: () => unknown[][] }).toArray
@@ -57,9 +78,10 @@ function MatrixRenderer({
 
   return (
     <div className="inline-flex items-stretch gap-2 my-2 py-1">
-      {/* Left Bracket */}
+      {/* Decorative Left Bracket */}
       <div className="w-2.5 border-l-2 border-t-2 border-b-2 border-zinc-400 dark:border-zinc-500 rounded-l-md" />
 
+      {/* Grid of matrix elements */}
       <div
         className="grid gap-x-6 gap-y-3 p-2 items-center"
         style={{
@@ -71,12 +93,13 @@ function MatrixRenderer({
             key={i}
             className="text-center font-mono text-base md:text-lg px-2 font-bold text-zinc-800 dark:text-zinc-200"
           >
+            {/* Format numbers to avoid excessively long decimals in the matrix grid */}
             {typeof cell === "number" ? Number(cell.toFixed(4)) : String(cell)}
           </div>
         ))}
       </div>
 
-      {/* Right Bracket */}
+      {/* Decorative Right Bracket */}
       <div className="w-2.5 border-r-2 border-t-2 border-b-2 border-zinc-400 dark:border-zinc-500 rounded-r-md" />
     </div>
   );
@@ -85,8 +108,7 @@ function MatrixRenderer({
 interface ScientificWorkspaceProps {
   initialData?: {
     variables: Record<string, string>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    history: { expr: string; res: any }[];
+    history: Array<{ input: string; output: string; timestamp: number }>;
     title: string;
   };
   sessionId?: string;
@@ -96,26 +118,36 @@ export function ScientificWorkspace({
   initialData,
   sessionId,
 }: ScientificWorkspaceProps) {
-  const mfRef = useRef<MathfieldElement>(null);
-  const [mounted, setMounted] = useState(false);
-  const [equation, setEquation] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [variables, setVariablesList] = useState<Record<string, string>>(
+  // --- Workspace State ---
+
+  /** Running history of all calculations performed in this session. */
+  const [history, setHistory] = useState<
+    Array<{ input: string; output: string; timestamp: number }>
+  >(initialData?.history || []);
+
+  /** Persistent mathematical variables (e.g., A = [1,2;3,4], x = 10). */
+  const [variables, setVariables] = useState<Record<string, string>>(
     initialData?.variables || {},
   );
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [history, setHistoryList] = useState<{ expr: string; res: any }[]>(
-    initialData?.history || [],
-  );
+
+  /** Current raw LaTeX input string from the MathField. */
+  const [input, setInput] = useState("");
+
+  /** The evaluated result of the last calculation. Can be a string, number, or array. */
+  const [result, setResult] = useState<unknown | null>(null);
+
+  /** Error message storage if an evaluation fails. */
+  const [error, setError] = useState<string | null>(null);
+
   const [title, setTitle] = useState(
     initialData?.title || "Untitled Scientific",
   );
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(
     sessionId,
   );
+
+  const mathFieldRef = useRef<MathfieldElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   // Matrix Editor State
@@ -126,15 +158,16 @@ export function ScientificWorkspace({
     ["0", "0"],
   ]);
   const [matrixVarName, setMatrixVarName] = useState("A");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
+  const [mounted, setMounted] = useState(false);
   const mountedRef = useRef(false);
 
   useEffect(() => {
     mountedRef.current = true;
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    if (mfRef.current) {
-      const mf = mfRef.current;
+    if (mathFieldRef.current) {
+      const mf = mathFieldRef.current;
       mf.mathVirtualKeyboardPolicy = "manual";
       mf.addEventListener("input", () => {
         setError(null);
@@ -144,21 +177,26 @@ export function ScientificWorkspace({
   }, []);
 
   const insertAtCursor = (content: string) => {
-    if (mfRef.current) {
-      mfRef.current.insert(content, { focus: true });
+    if (mathFieldRef.current) {
+      mathFieldRef.current.insert(content, { focus: true });
       setError(null);
     }
   };
 
+  /**
+   * Main calculation trigger.
+   * Pulls LaTeX from MathLive, parses it, handles variable assignments, 
+   * and delegates evaluation to the math library.
+   */
   const handleCalculate = () => {
-    if (!mfRef.current) return;
+    if (!mathFieldRef.current) return;
 
-    // Use LaTeX output for robust parsing of commands like \text{abc}, \left|, etc.
-    const latex = mfRef.current.value;
+    // Use LaTeX output for robust parsing of mathematical structures
+    const latex = mathFieldRef.current.value;
     const expression = latex;
 
     try {
-      // Check for assignment: "A = 10"
+      // Assignment Detection: Check if the user typed something like "A = 5 + 2"
       const assignmentMatch = expression.match(
         /^([a-z][a-z0-9]*)\s*=\s*(.*)$/i,
       );
@@ -168,20 +206,24 @@ export function ScientificWorkspace({
         const expr = assignmentMatch[2];
 
         if (expr.trim()) {
+          // Evaluate the right-hand side
           const val = evaluateMath(expr);
+          // Register variable globally in the parser
           setVariable(name, val);
-          setVariablesList((prev) => ({ ...prev, [name]: formatResult(val) }));
-          setEquation(latex);
+          // Update local state for UI rendering
+          setVariables((prev) => ({ ...prev, [name]: formatResult(val) }));
+          
+          setInput(latex);
           setResult(val);
-          setHistoryList((prev) =>
-            [{ expr: latex, res: val }, ...prev].slice(0, 5),
+          setHistory((prev) =>
+            [{ input: latex, output: formatResult(val), timestamp: Date.now() }, ...prev].slice(0, 5),
           );
           setError(null);
           return;
         }
       }
 
-      // If it ends with '=', strip it before evaluation
+      // Standard Evaluation: Strip trailing "=" if present
       const evalExpr = expression.endsWith("=")
         ? expression.slice(0, -1).trim()
         : expression.trim();
@@ -192,10 +234,10 @@ export function ScientificWorkspace({
       }
 
       const res = evaluateMath(evalExpr);
-      setEquation(latex + (latex.includes("=") ? "" : " ="));
+      setInput(latex + (latex.includes("=") ? "" : " ="));
       setResult(res);
-      setHistoryList((prev) =>
-        [{ expr: latex, res: res }, ...prev].slice(0, 5),
+      setHistory((prev) =>
+        [{ input: latex, output: formatResult(res), timestamp: Date.now() }, ...prev].slice(0, 5),
       );
       setError(null);
     } catch (e: unknown) {
@@ -206,32 +248,35 @@ export function ScientificWorkspace({
   };
 
   const clear = () => {
-    if (mfRef.current) {
-      mfRef.current.value = "";
+    if (mathFieldRef.current) {
+      mathFieldRef.current.value = "";
     }
-    setEquation("");
+    setInput("");
     setResult(null);
     setError(null);
   };
 
   const deleteLast = () => {
-    if (mfRef.current) {
-      mfRef.current.executeCommand("deleteBackward");
+    if (mathFieldRef.current) {
+      mathFieldRef.current.executeCommand("deleteBackward");
     }
   };
 
+  /**
+   * Generates a LaTeX bmatrix from the dialog state 
+   * and inserts it into the primary math field.
+   */
   const createMatrix = () => {
-    // Generate LaTeX bmatrix for visual consistency in MathLive
+    // Convert 2D string array to LaTeX bmatrix format
     const latexRows = matrixData.map((row) => row.join(" & ")).join(" \\\\ ");
     const matrixStr = `\\begin{bmatrix} ${latexRows} \\end{bmatrix}`;
 
-    // We insert it as LaTeX
-    if (mfRef.current) {
-      // If it's an assignment, we should include the variable name
+    if (mathFieldRef.current) {
+      // Prepend variable assignment if provided
       const content = matrixVarName
         ? `${matrixVarName} = ${matrixStr}`
         : matrixStr;
-      mfRef.current.insert(content, { focus: true });
+      mathFieldRef.current.insert(content, { focus: true });
     }
 
     setIsDialogOpen(false);
@@ -314,14 +359,14 @@ export function ScientificWorkspace({
                   key={i}
                   className="group p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:border-indigo-200 transition-all cursor-pointer"
                   onClick={() => {
-                    if (mfRef.current) mfRef.current.value = item.expr;
+                    if (mathFieldRef.current) mathFieldRef.current.value = item.input;
                   }}
                 >
                   <p className="text-[10px] text-zinc-400 truncate mb-0.5">
-                    {item.expr}
+                    {item.input}
                   </p>
                   <p className="text-xs font-bold text-zinc-700 dark:text-zinc-200 truncate">
-                    {formatResult(item.res)}
+                    {item.output}
                   </p>
                 </div>
               ))}
@@ -450,11 +495,11 @@ export function ScientificWorkspace({
               <div className="absolute -inset-1 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-emerald-500/20 rounded-[2rem] blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
               <div className="relative bg-white dark:bg-zinc-900 rounded-[1.8rem] border-2 border-zinc-100 dark:border-zinc-800 shadow-xl overflow-hidden min-h-[140px] flex flex-col p-6">
                 <div className="text-zinc-400 text-right text-xs font-mono mb-2 h-4 truncate opacity-60 italic">
-                  {equation}
+                  {input}
                 </div>
                 {mounted ? (
                   <MathField
-                    ref={mfRef}
+                    ref={mathFieldRef}
                     className="w-full text-2xl md:text-3xl font-medium outline-none text-zinc-800 dark:text-zinc-100 bg-transparent min-h-[40px]"
                   />
                 ) : (
@@ -467,8 +512,8 @@ export function ScientificWorkspace({
                     </div>
                   ) : result !== null ? (
                     <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 animate-in fade-in slide-in-from-right-4">
-                      {result && (result.isMatrix || Array.isArray(result)) ? (
-                        <MatrixRenderer data={result} />
+                      {result && (typeof result === "object" && (result as any).isMatrix || Array.isArray(result)) ? (
+                        <MatrixRenderer data={result as any} />
                       ) : (
                         <>
                           <span className="text-3xl font-black tracking-tight">
@@ -716,23 +761,18 @@ export function ScientificWorkspace({
       </div>
 
       <style jsx global>{`
+        /* Error Shake Animation */
         @keyframes shake {
-          0%,
-          100% {
-            transform: translateX(0);
-          }
-          25% {
-            transform: translateX(-4px);
-          }
-          75% {
-            transform: translateX(4px);
-          }
+          0%, 100% { transform: translateX(0); }
+          25% { transform: translateX(-4px); }
+          75% { transform: translateX(4px); }
         }
         .animate-shake {
           animation: shake 0.2s ease-in-out infinite;
           animation-iteration-count: 2;
         }
 
+        /* MathLive Custom Theming */
         math-field {
           --caret-color: #4f46e5;
           --selection-background-color: #4f46e530;
@@ -745,7 +785,7 @@ export function ScientificWorkspace({
           outline: none;
         }
         math-field::part(virtual-keyboard-toggle) {
-          display: none;
+          display: none; /* Hide default keyboard toggle as we use a custom UI */
         }
       `}</style>
     </div>

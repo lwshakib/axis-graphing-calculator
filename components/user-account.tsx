@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * UserAccount component for managing user sessions and profile visibility.
+ * Displays login/signup buttons for guests and a user profile dropdown for authenticated users.
+ */
+
 import React from "react";
 import { authClient } from "@/lib/auth-client";
 import {
@@ -16,23 +21,32 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 
 export function UserAccount() {
+  // Retrieve current session and loading state from Better-Auth client
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
   const pathname = usePathname();
 
+  /**
+   * Handles user logout with context-aware redirection.
+   * If the user is on a tool-specific page (e.g., /graph/123), redirects to the tool home (/graph).
+   * If on the dashboard, redirects to the application root.
+   */
   const handleLogOut = async () => {
     const parts = pathname.split("/").filter(Boolean);
     const tools = ["graph", "calculator", "scientific", "3d", "dashboard"];
 
     let target = pathname;
 
-    // Check if we are on a session page: /tool/some-id
+    // Logic to determine redirection target after logout
     if (parts.length === 2 && tools.includes(parts[0])) {
+      // User is on a specific session page -> Go to tool home
       target = `/${parts[0]}`;
     } else if (parts[0] === "dashboard") {
+      // User is on dashboard -> Go to root landing page
       target = "/";
     }
 
+    // Execute sign out and perform navigation on success
     await authClient.signOut({
       fetchOptions: {
         onSuccess: () => {
@@ -43,10 +57,12 @@ export function UserAccount() {
     });
   };
 
+  // Render a loading state (pulse effect) while session status is being determined
   if (isPending) {
     return <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />;
   }
 
+  // Render Guest view if no active session is found
   if (!session) {
     return (
       <div className="flex items-center gap-2">
@@ -69,7 +85,9 @@ export function UserAccount() {
     );
   }
 
+  // Authenticated view variables
   const user = session.user;
+  // Generate initials for the avatar fallback
   const initials =
     user.name
       ?.split(" ")
@@ -80,6 +98,7 @@ export function UserAccount() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
+        {/* Profile Avatar Button */}
         <Button
           variant="ghost"
           className="relative h-8 w-8 rounded-full p-0 overflow-hidden ring-offset-background transition-all hover:ring-2 hover:ring-primary/20"
@@ -93,10 +112,11 @@ export function UserAccount() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className="w-48 rounded-lg p-1.5"
+        className="w-48 rounded-lg p-1.5 shadow-xl border-border/50"
         align="end"
         forceMount
       >
+        {/* User Metadata Header */}
         <div className="flex flex-col space-y-0.5 p-2">
           <p className="text-sm font-bold leading-none">{user.name}</p>
           <p className="text-xs leading-none text-muted-foreground truncate">
@@ -104,6 +124,8 @@ export function UserAccount() {
           </p>
         </div>
         <DropdownMenuSeparator />
+        
+        {/* Navigation Items */}
         <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
           <Link href="/account" className="flex items-center w-full">
             <UserIcon className="mr-2 h-3.5 w-3.5" />
@@ -116,7 +138,10 @@ export function UserAccount() {
             <span>My Sessions</span>
           </Link>
         </DropdownMenuItem>
+        
         <DropdownMenuSeparator />
+        
+        {/* Destructive Logout Action */}
         <DropdownMenuItem
           className="rounded-lg cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"
           onClick={handleLogOut}

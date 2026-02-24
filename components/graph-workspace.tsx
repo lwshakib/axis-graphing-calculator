@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * GraphWorkspace component: The core 2D function plotter.
+ * Renders equations on an HTML Canvas with pan/zoom interactions.
+ * Supports multiple equations with color coding, visibility toggling,
+ * adaptive sub-pixel sampling, and automatic grid scaling.
+ */
+
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Plus,
@@ -22,13 +29,16 @@ import { SaveSessionButton } from "@/components/save-session-button";
 import { useRouter } from "next/navigation";
 
 // --- Types ---
+
+/** Represents a single function to be plotted on the graph. */
 interface Equation {
   id: string;
-  expression: string;
-  color: string;
-  visible: boolean;
+  expression: string; // The math string (e.g., "x^2 + 2x")
+  color: string;      // CSS hex color
+  visible: boolean;   // Whether the curve is currently drawn
 }
 
+/** Palette of curve colors cycled through as equations are added. */
 const COLORS = [
   "#2d70b3", // Blue
   "#c74440", // Red
@@ -50,6 +60,9 @@ export function GraphWorkspace({
   initialData,
   sessionId,
 }: GraphWorkspaceProps) {
+  // --- State Management ---
+  
+  /** List of active equations, initialized from props or defaults. */
   const [equations, setEquations] = useState<Equation[]>(
     initialData?.equations || [
       { id: "1", expression: "x^2", color: COLORS[0], visible: true },
@@ -57,30 +70,39 @@ export function GraphWorkspace({
       { id: "3", expression: "", color: COLORS[2], visible: true },
     ],
   );
+
+  /** Viewport state: controls the center (math space) and scaling factor. */
   const [viewport, setViewport] = useState(
     initialData?.viewport || { x: 0, y: 0, zoom: 40 },
   );
+
   const [title, setTitle] = useState(initialData?.title || "Untitled Graph");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(
     sessionId,
   );
+  
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const router = useRouter();
 
+  // Refs for the canvas and its container (needed for sizing and drawing)
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  /** Virtual keyboard state and the ID of the equation being edited. */
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [activeEquationId, setActiveEquationId] = useState<string | null>(null);
 
+  // --- Equation Operations ---
+
+  /** Appends a new blank equation row to the sidebar, cycling the color palette. */
   const addEquation = () => {
     const nextColor = COLORS[equations.length % COLORS.length];
     setEquations([
       ...equations,
       {
-        id: Math.random().toString(36).substr(2, 9),
+        id: Math.random().toString(36).substring(2, 11),
         expression: "",
         color: nextColor,
         visible: true,
@@ -88,16 +110,22 @@ export function GraphWorkspace({
     ]);
   };
 
+  /** Updates the expression string for a specific equation by ID. */
   const updateEquation = (id: string, expression: string) => {
     setEquations(
       equations.map((eq) => (eq.id === id ? { ...eq, expression } : eq)),
     );
   };
 
+  /** Updates the hex color for a curve. */
   const updateEquationColor = (id: string, color: string) => {
     setEquations(equations.map((eq) => (eq.id === id ? { ...eq, color } : eq)));
   };
 
+  /** 
+   * Removes an equation. If it's the last one, it clears characters instead 
+   * to ensure at least one row always exists in the UI. 
+   */
   const removeEquation = (id: string) => {
     if (equations.length > 1) {
       setEquations(equations.filter((eq) => eq.id !== id));
@@ -108,6 +136,7 @@ export function GraphWorkspace({
     }
   };
 
+  /** Toggles whether a specific function is rendered on the canvas. */
   const toggleVisibility = (id: string) => {
     setEquations(
       equations.map((eq) =>
@@ -116,6 +145,10 @@ export function GraphWorkspace({
     );
   };
 
+  /** 
+   * Handles inputs from the virtual MathKeyboard. 
+   * Maps special cases like backspace and common functions.
+   */
   const handleKeyboardInput = (val: string) => {
     if (!activeEquationId) return;
 
@@ -127,6 +160,7 @@ export function GraphWorkspace({
           if (val === "clear") return { ...eq, expression: "" };
           if (val === "=") return eq;
 
+          // Automatically add opening parenthesis for functions
           const isFunc = [
             "sin",
             "cos",
@@ -144,7 +178,13 @@ export function GraphWorkspace({
     );
   };
 
-  // --- Graph Rendering Logic ---
+  // --- Rendering Engine ---
+
+  /**
+   * Main rendering function for the graph canvas.
+   * Draws grid lines, axes, labels, and all visible equation curves.
+   * Wrapped in useCallback for stable reference across re-renders.
+   */
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -157,14 +197,18 @@ export function GraphWorkspace({
 
     ctx.clearRect(0, 0, width, height);
 
+    // --- Adaptive Grid Step Calculation ---
+    // Targets ~80px spacing between major grid lines at any zoom level.
+    // Uses log10 to find a "nice" step size (1, 2, 5, 10, 20, 50, ...)
     const targetSpacing = 80;
     const baseLog = Math.log10(targetSpacing / zoom);
     const exponent = Math.floor(baseLog);
     const fractional = baseLog - exponent;
 
     let step = Math.pow(10, exponent);
-    let subStep = step / 5;
+    let subStep = step / 5; // Minor grid subdivisions
 
+    // Snap to the nearest "nice" step value
     if (fractional > Math.log10(5)) {
       step *= 10;
       subStep = step / 5;
@@ -176,14 +220,17 @@ export function GraphWorkspace({
       subStep = step / 4;
     }
 
+    // Convert math origin (0,0) to screen pixel coordinates
     const screenCenterX = width / 2 - centerX * zoom;
     const screenCenterY = height / 2 + centerY * zoom;
 
+    /** Helper to draw vertical and horizontal grid lines at a given step size. */
     const drawGridLines = (s: number, color: string, lineWidth: number) => {
       ctx.strokeStyle = color;
       ctx.lineWidth = lineWidth;
       ctx.beginPath();
 
+      // Vertical grid lines
       const firstX = Math.floor((-width / 2 + centerX * zoom) / (s * zoom)) * s;
       for (
         let gx = firstX;
@@ -195,6 +242,7 @@ export function GraphWorkspace({
         ctx.lineTo(sx, height);
       }
 
+      // Horizontal grid lines
       const firstY =
         Math.floor((-height / 2 + centerY * zoom) / (s * zoom)) * s;
       for (
@@ -209,23 +257,27 @@ export function GraphWorkspace({
       ctx.stroke();
     };
 
+    // Draw minor grid (faint) then major grid (slightly bolder)
     drawGridLines(subStep, isDark ? "#1e293b" : "#f0f0f0", 1);
     drawGridLines(step, isDark ? "#334155" : "#e0e0e0", 1.5);
 
+    // Draw X and Y axes as bold lines
     ctx.strokeStyle = isDark ? "#94a3b8" : "#000000";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, screenCenterY);
+    ctx.moveTo(0, screenCenterY);     // X-axis
     ctx.lineTo(width, screenCenterY);
-    ctx.moveTo(screenCenterX, 0);
+    ctx.moveTo(screenCenterX, 0);     // Y-axis
     ctx.lineTo(screenCenterX, height);
     ctx.stroke();
 
+    // Axis Labels (Numbers)
     ctx.fillStyle = isDark ? "#94a3b8" : "#666666";
     ctx.font = "12px Inter, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "top";
 
+    // Draw X labels
     const firstLabelX =
       Math.floor((-width / 2 + centerX * zoom) / (step * zoom)) * step;
     for (
@@ -233,7 +285,7 @@ export function GraphWorkspace({
       lx * zoom < width / 2 + centerX * zoom + step * zoom;
       lx += step
     ) {
-      if (Math.abs(lx) < step / 100) continue;
+      if (Math.abs(lx) < step / 100) continue; // Hide the origin label to avoid axes overlap
       const sx = width / 2 + (lx - centerX) * zoom;
       ctx.fillText(
         lx.toLocaleString(undefined, { maximumSignificantDigits: 4 }),
@@ -242,6 +294,7 @@ export function GraphWorkspace({
       );
     }
 
+    // Draw Y labels
     ctx.textAlign = "right";
     ctx.textBaseline = "middle";
     const firstLabelY =
@@ -260,6 +313,8 @@ export function GraphWorkspace({
       );
     }
 
+    // --- Equation Curve Rendering ---
+    // Each visible equation is compiled once, then evaluated across the viewport.
     equations.forEach((eq) => {
       if (!eq.visible || !eq.expression) return;
 
@@ -268,17 +323,22 @@ export function GraphWorkspace({
       ctx.beginPath();
 
       try {
+        // Compile expression once for performance
         const f = compileMath(eq.expression);
         let first = true;
         let prevYValue: number | null = null;
         let prevSy: number | null = null;
 
-        // Sampling improvement:
-        // We evaluate more points per pixel if the slope is high to ensure we reach the screen edge.
+        /**
+         * Plotting Strategy:
+         * Iterate over every horizontal pixel on the canvas.
+         * For each pixel, evaluate the function at several sub-points (sampling).
+         */
         for (let sx = 0; sx < width; sx++) {
           const x = (sx - width / 2) / zoom + centerX;
 
-          // Adaptive sampling: evaluate 3 points per pixel
+          // Adaptive sub-pixel sampling: evaluate 3 sub-points per pixel
+          // This improves curve smoothness, especially for high-frequency functions
           const subSamples = 3;
           for (let s = 0; s < subSamples; s++) {
             const currentX = x + s / subSamples / zoom;
@@ -289,9 +349,15 @@ export function GraphWorkspace({
               !isNaN(yValue) &&
               isFinite(yValue)
             ) {
+              // Convert math Y to screen Y (inverted because screen Y grows downward)
               const sy = height / 2 + (centerY - yValue) * zoom;
 
-              // Break line if we cross an asymptote (sign flip + huge jump)
+              /**
+               * Asymptote Detection: 
+               * Check for vertical discontinuities (like tan(x)).
+               * If there's a sign flip AND a huge vertical jump,
+               * break the line path to avoid drawing a vertical stroke through infinity.
+               */
               if (prevYValue !== null && prevSy !== null) {
                 const jump = Math.abs(sy - prevSy);
                 const signFlip =
@@ -311,6 +377,7 @@ export function GraphWorkspace({
               prevSy = sy;
               prevYValue = yValue;
             } else {
+              // NaN or Infinity → break the path (e.g., log of negative)
               first = true;
               prevSy = null;
               prevYValue = null;
@@ -319,11 +386,12 @@ export function GraphWorkspace({
         }
         ctx.stroke();
       } catch {
-        // expression failed to compile/evaluate, skip silently
+        // Expression failed to compile/evaluate → skip silently
       }
     });
   }, [viewport, equations, isDark]);
 
+  // Resize canvas to match its container whenever the window resizes
   useEffect(() => {
     const handleResize = () => {
       if (containerRef.current && canvasRef.current) {
@@ -334,43 +402,50 @@ export function GraphWorkspace({
     };
 
     window.addEventListener("resize", handleResize);
-    handleResize();
+    handleResize(); // Initial sizing
     return () => window.removeEventListener("resize", handleResize);
   }, [draw]);
 
+  // --- Pan & Zoom Interaction Handlers ---
   const isDragging = useRef(false);
   const lastMousePos = useRef({ x: 0, y: 0 });
 
+  /** Begin panning on mouse down */
   const onMouseDown = (e: React.MouseEvent) => {
     isDragging.current = true;
     lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
+  /** Pan the viewport by translating mouse pixel deltas into math-space offsets */
   const onMouseMove = (e: React.MouseEvent) => {
     if (!isDragging.current) return;
     const dx = e.clientX - lastMousePos.current.x;
     const dy = e.clientY - lastMousePos.current.y;
     setViewport((v) => ({
       ...v,
-      x: v.x - dx / v.zoom,
-      y: v.y + dy / v.zoom,
+      x: v.x - dx / v.zoom, // Divide by zoom to convert pixel delta to math delta
+      y: v.y + dy / v.zoom, // Y is inverted (screen vs. math coordinates)
     }));
     lastMousePos.current = { x: e.clientX, y: e.clientY };
   };
 
+  /** End panning on mouse up */
   const onMouseUp = () => {
     isDragging.current = false;
   };
 
+  /** Zoom in/out using scroll wheel with exponential scaling */
   const onWheel = (e: React.WheelEvent) => {
     const delta = -e.deltaY;
     const factor = Math.pow(1.1, delta / 100);
     setViewport((v) => {
+      // Clamp zoom to prevent extreme values that break rendering
       const newZoom = Math.max(1e-12, Math.min(v.zoom * factor, 1e12));
       return { ...v, zoom: newZoom };
     });
   };
 
+  /** Trigger a redraw whenever the component re-renders (state changes) */
   useEffect(() => {
     draw();
   }, [draw]);
@@ -378,6 +453,8 @@ export function GraphWorkspace({
   return (
     <div className="flex h-[calc(100vh-64px)] w-full bg-background overflow-hidden font-sans text-foreground transition-colors duration-300">
       <main className="flex w-full relative flex-1">
+        
+        {/* --- Sidebar Panel --- */}
         <div
           className={cn(
             "h-full bg-background border-r border-gray-200 dark:border-slate-800 transition-all duration-300 ease-in-out flex flex-col shadow-xl z-20",
@@ -387,7 +464,7 @@ export function GraphWorkspace({
               : "w-0 -translate-x-full md:translate-x-0 md:-ml-1 overflow-hidden",
           )}
         >
-          {/* Sidebar Toolbar */}
+          {/* Header containing Title and Save Button */}
           <div className="flex items-center justify-between p-3 border-b border-border bg-background transition-colors duration-300">
             <div className="flex items-center gap-2 px-2">
               <Edit3 size={16} className="text-primary" />
@@ -417,6 +494,7 @@ export function GraphWorkspace({
             </div>
           </div>
 
+          {/* Quick Toolbar (Reset View) */}
           <div className="flex items-center justify-between p-2 px-4 bg-muted/30 border-b border-border">
             <Button
               variant="ghost"
@@ -430,7 +508,7 @@ export function GraphWorkspace({
             </Button>
           </div>
 
-          {/* Equation List */}
+          {/* Dynamic Equation List */}
           <div className="flex-1 overflow-y-auto custom-scrollbar p-0">
             {equations.map((eq, index) => (
               <div
@@ -444,6 +522,7 @@ export function GraphWorkspace({
                 <div className="text-xs text-gray-400 w-4 pt-2 font-medium">
                   {index + 1}
                 </div>
+                {/* Color Selector & Visibility Toggle */}
                 <div
                   className={cn(
                     "w-8 h-8 rounded-full border-2 flex-shrink-0 cursor-pointer mt-1 flex items-center justify-center transition-all relative group/color",
@@ -467,7 +546,7 @@ export function GraphWorkspace({
                         type="color"
                         value={eq.color}
                         className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair scale-150"
-                        onClick={(e) => e.stopPropagation()} // Prevent click from propagating to parent div (visibility toggle)
+                        onClick={(e) => e.stopPropagation()}
                         onChange={(e) =>
                           updateEquationColor(eq.id, e.target.value)
                         }
@@ -475,6 +554,7 @@ export function GraphWorkspace({
                     </div>
                   </div>
                 </div>
+                {/* Expression Input */}
                 <div className="flex-1 min-w-0">
                   <Input
                     value={eq.expression}
@@ -484,6 +564,7 @@ export function GraphWorkspace({
                     className="border-none bg-transparent shadow-none focus-visible:ring-0 text-lg p-0 h-auto font-mono placeholder:text-muted-foreground/30 transition-all rounded-none"
                   />
                 </div>
+                {/* Inline Actions (Eye, Trash) */}
                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
                   <Button
                     variant="ghost"
@@ -507,6 +588,8 @@ export function GraphWorkspace({
                 </div>
               </div>
             ))}
+            
+            {/* Add Equation Trigger Area */}
             <div
               className="p-4 border-b border-border cursor-text text-muted-foreground/40 hover:text-muted-foreground transition-all duration-300 bg-transparent h-24 text-sm font-medium italic flex items-center justify-center border-dashed group"
               onClick={addEquation}
@@ -518,6 +601,7 @@ export function GraphWorkspace({
             </div>
           </div>
 
+          {/* Sidebar Footer (Keyboard Trigger) */}
           <div className="p-4 border-t border-border flex justify-between items-center bg-background">
             <div className="flex items-center gap-3 w-full">
               <Button
@@ -540,12 +624,14 @@ export function GraphWorkspace({
           </div>
         </div>
 
+        {/* --- Floating Keyboard --- */}
         <MathKeyboard
           isOpen={keyboardOpen}
           onClose={() => setKeyboardOpen(false)}
           onInput={handleKeyboardInput}
         />
 
+        {/* Overlay toggle to restore sidebar when hidden */}
         {!sidebarOpen && (
           <Button
             variant="outline"
@@ -557,6 +643,7 @@ export function GraphWorkspace({
           </Button>
         )}
 
+        {/* --- Primary Canvas Area --- */}
         <div
           ref={containerRef}
           className={cn(
@@ -570,6 +657,7 @@ export function GraphWorkspace({
         >
           <canvas ref={canvasRef} className="w-full h-full" />
 
+          {/* Floating UI Controls (Zoom In/Out) */}
           <div className="absolute right-6 top-6 flex flex-col gap-3">
             <div className="flex flex-col bg-background/80 backdrop-blur-xl rounded-2xl shadow-xl border border-border/50 overflow-hidden transition-all duration-300">
               <Button

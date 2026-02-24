@@ -3,6 +3,15 @@ import prisma from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 
+/**
+ * GET /api/sessions/[id]
+ * 
+ * Retrieves a single session by its unique ID.
+ * Note: This endpoint is currently public to allow users to share their mathematical 
+ * creations via link. Security relies on the UUID's unguessability.
+ * 
+ * @param params Object containing the session UUID from the URL path.
+ */
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -28,6 +37,14 @@ export async function GET(
   }
 }
 
+/**
+ * DELETE /api/sessions/[id]
+ * 
+ * Destructive endpoint to remove a saved session.
+ * Requires the user to be authenticated AND to be the original owner of the session.
+ * 
+ * @param params Object containing the session UUID to delete.
+ */
 export async function DELETE(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
@@ -43,6 +60,10 @@ export async function DELETE(
   const { id } = await params;
 
   try {
+    /**
+     * Constraint: id AND userId
+     * This prevents users from deleting sessions they don't own by just guessing IDs.
+     */
     await prisma.savedSession.delete({
       where: { id, userId: session.user.id },
     });

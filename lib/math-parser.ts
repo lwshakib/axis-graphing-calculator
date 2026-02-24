@@ -1,30 +1,55 @@
 import { create, all } from "mathjs";
 
+// Initialize mathjs instance with all available functionality
 const math = create(all);
 
 /**
  * A powerful mathematical expression parser backed by math.js.
  * Supports matrices, calculus, vectors, and advanced algebra.
+ * This library acts as the bridge between LaTeX/AsciiMath inputs 
+ * and the numerical engine.
  */
 
 // Store for matrix variables and other user-defined variables
+// This scope is shared across evaluations unless cleared.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let variableScope: Record<string, any> = {};
 
+/**
+ * Sets a variable in the global evaluation scope.
+ * @param name Variable name (e.g., 'x', 'A')
+ * @param value Value to assign (number, matrix, etc.)
+ */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setVariable(name: string, value: any) {
   variableScope[name] = value;
 }
 
+/**
+ * Retrieves the current variable scope.
+ * @returns The global scope object
+ */
 export function getScope() {
   return variableScope;
 }
 
+/**
+ * Resets the variable scope to an empty state.
+ */
 export function clearScope() {
   variableScope = {};
 }
 
-// Custom Numerical Integration (Definite): integrate(f(x), a, b)
+/**
+ * Custom Numerical Integration using Simpson's Rule (Definite): integrate(f(x), a, b)
+ * Implements a standard numerical approximation for functions that may not 
+ * have elementary antiderivatives.
+ * 
+ * @param fExpr The function expression or function object to integrate
+ * @param a Lower bound of integration
+ * @param b Upper bound of integration
+ * @param steps Number of sub-intervals (default 1000 for high precision)
+ */
 function internalIntegrate(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fExpr: any,
@@ -32,16 +57,23 @@ function internalIntegrate(
   b: number,
   steps: number = 1000,
 ) {
-  // If fExpr is a function (passed by mathjs), use it directly
+  // Determine if fExpr is a function (passed by mathjs) or a string/node to be compiled
   const f =
     typeof fExpr === "function"
       ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (scope: any) => fExpr(scope.x)
       : compileMath(fExpr.toString());
 
+  // Width of each sub-interval
   const h = (b - a) / steps;
+  // Initialize sum with boundary points f(a) and f(b)
   let sum = f({ x: a }) + f({ x: b });
 
+  /**
+   * Apply Simpson's Rule formula:
+   * (h/3) * [f(x0) + 4f(x1) + 2f(x2) + 4f(x3) + ... + f(xn)]
+   * Weight 4 for odd intervals, weight 2 for even.
+   */
   for (let i = 1; i < steps; i++) {
     const x = a + i * h;
     sum += f({ x }) * (i % 2 === 0 ? 2 : 4);
@@ -50,17 +82,18 @@ function internalIntegrate(
   return (h / 3) * sum;
 }
 
-// Register custom functions and aliases to mathjs
+// Register custom functions and aliases to the mathjs instance for global availability.
 math.import(
   {
     integrate: internalIntegrate,
     // Add common aliases for inverse trig functions used by MathLive/LaTeX
+    // This ensures that either 'asin' or 'arcsin' can be used interchangeably
     arcsin: math.asin,
     arccos: math.acos,
     arctan: math.atan,
     arccot: math.acot,
     arcsec: math.asec,
-    arccsc: math.acsc,
+    arcccsc: math.acsc,
     asin: math.asin,
     acos: math.acos,
     atan: math.atan,
@@ -71,21 +104,27 @@ math.import(
 
 /**
  * Evaluates a mathematical expression using math.js.
+ * Includes heavy pre-processing to handle LaTeX and AsciiMath syntax.
+ * 
+ * @param expression The expression string to evaluate
+ * @param scope Optional local scope for this specific evaluation
+ * @returns The resulting math value (number, matrix, etc.)
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function evaluateMath(expression: string, scope?: Record<string, any>) {
+  // Safeguard against empty input
   if (!expression || expression.trim() === "") return 0;
 
   try {
-    // 1. Pre-Normalization: Clean up MathLive/AsciiMath quirks
+    // 1. Pre-Normalization: Clean up MathLive/AsciiMath quirks to make them mathjs-compatible
     let normalized = expression;
 
     // Handle LaTeX Matrices \begin{pmatrix} ... \end{pmatrix} -> [[...]]
-    // Also handle \begin{array} ... \end{array}
-    // Do this BEFORE removing backslashes
+    // This regex converts LaTeX matrix/array blocks into JSON-like nested array syntax
     normalized = normalized.replace(
       /\\begin\{([a-z]*matrix|array)\}(?:\{.*?\})?([\s\S]*?)\\end\{\1\}/g,
       (_, type, contents) => {
+        // Split contents by '\\' for rows and '&' for columns
         const rows = contents
           .trim()
           .split("\\\\")
@@ -98,18 +137,17 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
       },
     );
 
-    // Handle AsciiMath Matrices ((a,b,c),(d,e,f)) -> [[a,b,c],[d,e,f]]
-    // Only replace if they look like actual matrices (contain more parens or nested structure)
-    // and aren't immediately preceded by a function name
+    // Handle AsciiMath Matrices formatted as ((a,b,c),(d,e,f)) -> [[a,b,c],[d,e,f]]
+    // This is common in some visual math editors.
     if (normalized.includes("((") && normalized.includes("))")) {
       normalized = normalized.replace(
         /([^a-z0-9]|^)\(\s*\(([\s\S]*?)\)\s*\)/gi,
         (match, prefix, inner) => {
           // If it looks like a function call like sin((x)), prefix will be 'n' (last char of sin)
-          // We only want to replace if prefix is NOT a letter or if it's the start
+          // We only want to replace if prefix is NOT a letter or if it's at the start of the string
           if (prefix && /[a-z]/i.test(prefix)) return match;
 
-          // If it's a single row like ((1,2,3)) -> inner is "1,2,3"
+          // If it's a single row matrix like ((1,2,3)) -> inner is "1,2,3"
           if (
             !inner.includes("),") &&
             !inner.includes(") ,") &&
@@ -129,137 +167,91 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
       );
     }
 
-    // Handle fractions \frac{a}{b} -> (a)/(b) if they somehow persist
+    // Convert LaTeX fractions \frac{a}{b} -> ((a)/(b))
     normalized = normalized.replace(/\\frac\{(.*?)\}\{(.*?)\}/g, "(($1)/($2))");
 
-    // Handle common LaTeX operators and text wrappers BEFORE removing backslashes
+    // Remove LaTeX text wrappers like \text{...} or \operatorname{...} but keep contents
     normalized = normalized.replace(
       /\\(text|operatorname|mathrm|math[a-z]+)\{(.*?)\}/g,
       "$2",
     );
+    // Remove space-separated LaTeX text commands like \text someText
     normalized = normalized.replace(
       /\\(text|operatorname|mathrm|math[a-z]+)\s+/g,
       " ",
     );
 
+    // Replace LaTeX symbols with mathjs operators
     normalized = normalized
-      .replace(/\\cdot/g, "*")
-      .replace(/\\times/g, "*")
-      .replace(/\\left\(/g, "(")
-      .replace(/\\right\)/g, ")")
-      .replace(/\\left\[/g, "[")
-      .replace(/\\right\]/g, "]")
-      .replace(/\\left\|/g, "abs(")
-      .replace(/\\right\|/g, ")")
-      .replace(/\\lvert/g, "abs(")
-      .replace(/\\rvert/g, ")")
-      // Basic pipe handling for direct input like |x|
-      // This is a bit risky but needed for manual keyboard input "Shit+\"
-      .replace(/\|([^|]+)\|/g, "abs($1)")
-      .replace(/\\/g, "") // Remove remaining backslashes (safe after command handling)
-      .replace(/×/g, "*")
-      .replace(/÷/g, "/")
-      .replace(/π/g, "pi");
-
-    // 2. Handle specific derivative/integration patterns
-    // Pattern: (d)/(d x)(expr) or (d)/(dx)(expr)
-    normalized = normalized.replace(
-      /\(d\)\/\(d\s*([a-z])\)\s*\((.*?)\)/gi,
-      (match, v, expr) => {
-        return `derivative('${expr}', '${v}')`;
-      },
-    );
+      .replace(/\\cdot/g, "*")           // Multiplier dot
+      .replace(/\\times/g, "*")          // Multiplication cross
+      .replace(/\\left\(/g, "(")         // Left parenthesis
+      .replace(/\\right\)/g, ")")        // Right parenthesis
+      .replace(/\\left\[/g, "[")         // Left bracket
+      .replace(/\\right\]/g, "]")        // Right bracket
+      .replace(/\\left\|/g, "abs(")     // Left absolute value bar
+      .replace(/\\right\|/g, ")")        // Right absolute value bar
+      .replace(/\\lvert/g, "abs(")       // Alternative absolute value command
+      .replace(/\\rvert/g, ")")          // Alternative absolute value command
+      .replace(/\\/g, "")               // Strip remaining backslashes
+      .replace(/×/g, "*")                // Unicode multiplication
+      .replace(/÷/g, "/")                // Unicode division
+      .replace(/π/g, "pi");              // Unicode pi symbol
 
     // Pattern: d/dx(expr)
     normalized = normalized.replace(
       /d\/d([a-z])\s*\((.*?)\)/gi,
-      (match, v, expr) => {
-        return `derivative('${expr}', '${v}')`;
-      },
+      (match, v, expr) => `derivative('${expr}', '${v}')`,
     );
 
-    // Pattern: d/dx expr
-    normalized = normalized.replace(
-      /d\/d([a-z])\s+([a-z0-9^]+)/gi,
-      (match, v, expr) => {
-        return `derivative('${expr}', '${v}')`;
-      },
-    );
+    // Implicit multiplication (e.g., 2x -> 2*x)
+    normalized = normalized.replace(/(\d)([a-zA-Z(])/g, "$1*$2");
 
-    // 3. Handle Integration patterns
-    normalized = normalized.replace(
-      /int\s*_\{?(.*?)\}?\^\{?(.*?)\}?\s*\((.*?)\)\s*d\s*[a-z]/gi,
-      (match, a, b, expr) => {
-        return `integrate('${expr}', ${a}, ${b})`;
-      },
-    );
-
-    normalized = normalized.replace(
-      /int\s*_([-?0-9.]+)\^([-?0-9.]+)\s*\((.*?)\)\s*d\s*[a-z]/gi,
-      (match, a, b, expr) => {
-        return `integrate('${expr}', ${a}, ${b})`;
-      },
-    );
-
-    // Additional cleaning for words that might have been part of LaTeX commands
-    // and ensuring common functions are lowercase
-    const funcMap: Record<string, string> = {
-      ABS: "abs",
-      Abs: "abs",
-      SIN: "sin",
-      Sin: "sin",
-      COS: "cos",
-      Cos: "cos",
-      TAN: "tan",
-      Tan: "tan",
-      LOG: "log",
-      Log: "log",
-      LN: "ln",
-      Ln: "ln",
-      SQRT: "sqrt",
-      Sqrt: "sqrt",
-    };
-
-    Object.entries(funcMap).forEach(([upper, lower]) => {
-      normalized = normalized.replace(new RegExp(`\\b${upper}\\b`, "g"), lower);
-    });
-
-    // Handle the case where someone might have typed text{abs} but backslash was gone
-    normalized = normalized.replace(/text\{(.*?)\}/g, "$1");
-    normalized = normalized.replace(/operatorname\{(.*?)\}/g, "$1");
-
+    // Perform final evaluation with the prepared scope
     const result = math.evaluate(normalized, scope || variableScope);
 
-    // If the result is a mathjs Node (e.g., from derivative), evaluate it to get a value
+    // If the result is a mathjs Node (symbolic representation), evaluate it
     if (result && typeof result === "object" && result.isNode) {
       try {
         return result.evaluate(scope || variableScope);
       } catch (err) {
-        // If evaluation fails (e.g., missing variables), return the symbolic Node
         return result;
       }
     }
 
     return result;
   } catch (error) {
+    console.error("Evaluation Error in math-parser:", error, "Expression:", expression);
     throw error;
   }
 }
 
 /**
- * Compiles a mathematical expression into a reusable function.
+ * Compiles a mathematical expression into a reusable function for performance.
+ * Best for graphing where the same expression is evaluated for many 'x' values.
+ * 
+ * @param expression The expression string to compile
+ * @returns A function that takes a scope and returns the evaluation result
  */
 export function compileMath(expression: string) {
+  // Empty input returns a function that always returns 0
   if (!expression || expression.trim() === "") return () => 0;
 
   try {
+    // Basic symbol normalization for compiled functions
     const normalized = expression
       .replace(/×/g, "*")
       .replace(/÷/g, "/")
-      .replace(/π/g, "pi");
+      .replace(/π/g, "pi")
+      .replace(/\\cdot/g, "*")
+      .replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, "($1)/($2)");
 
+    // Parse the expression into an Abstract Syntax Tree (AST)
     const node = math.parse(normalized);
+    // Compile the AST into JavaScript code
     const code = node.compile();
+    
+    // Return a wrapped function that uses the provided scope or global scope
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (scope?: Record<string, any>) =>
       code.evaluate(scope || variableScope);
@@ -270,20 +262,22 @@ export function compileMath(expression: string) {
 }
 
 /**
- * Specialized functions for Advanced Calculator features
+ * Calculates symbolic derivative.
  */
-
-// Derivative: diff(expression, variable)
 export function derivative(expression: string, variable: string = "x") {
   return math.derivative(expression, variable).toString();
 }
 
-// Simplify: simplify(expression)
+/**
+ * Simplified a math expression symbolically.
+ */
 export function simplify(expression: string) {
   return math.simplify(expression).toString();
 }
 
-// Export the integrate function as well
+/**
+ * Export the internal integration function for external use.
+ */
 export function integrate(
   expression: string,
   a: number,
@@ -295,19 +289,25 @@ export function integrate(
 
 /**
  * Formats a mathjs result for display.
- * Handles numbers, matrices, and units.
+ * Handles numbers (with precision), matrices, and other complex types.
+ * 
+ * @param result The value to format
+ * @returns A user-friendly string representation
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatResult(result: any): string {
   if (result === undefined || result === null) return "0";
 
+  // Format numbers to a fixed precision to avoid floating point artifacts
   if (typeof result === "number") {
     return math.format(result, { precision: 14 });
   }
 
+  // Handle mathjs matrices or native arrays
   if (result.isMatrix || Array.isArray(result)) {
     return math.format(result);
   }
 
+  // Fallback to generic string conversion
   return result.toString();
 }

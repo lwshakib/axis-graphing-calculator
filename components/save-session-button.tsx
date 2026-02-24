@@ -1,5 +1,21 @@
 "use client";
 
+/**
+ * SaveSessionButton Component
+ * 
+ * A mission-critical utility that bridges the gap between client-side math 
+ * state and server-side persistence. 
+ * 
+ * Key Features:
+ * 1. Intent-Based Persistence: If a guest tries to save, their intent (data type/title)
+ *    is cached in localStorage, allowing the session to be automatically created 
+ *    immediately after they complete the authentication flow.
+ * 2. Polymorphic Saving: Handles 'graph', 'calculator', 'scientific', and '3d' types 
+ *    via a unified API endpoint.
+ * 3. Reactive UI: Provides visual feedback (loaders, toasts) and conditional 
+ *    rendering based on existing session IDs.
+ */
+
 import React, { useState, useEffect } from "react";
 import { Save, LogIn, Loader2 } from "lucide-react";
 import Link from "next/link";
@@ -19,13 +35,21 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 interface SaveSessionButtonProps {
+  /** The specific workspace module generating the data. */
   type: "graph" | "calculator" | "scientific" | "3d";
+  /** The state object (equations, viewport, matrices, etc.) to be JSON serialized. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
+  data: any; 
+  /** Optional: The UUID of an existing session. If provided, the button performs an update instead of a create. */
   currentSessionId?: string;
+  /** Callback triggered after a successful server-side save. */
   onSaveSuccess?: (id: string, title: string) => void;
 }
 
+/** 
+ * LocalStorage key used to store the persistence intent across redirects.
+ * Essential for the 'Guest -> Sign In -> Automatic Save' workflow.
+ */
 const AUTOSAVE_KEY = "axis_pending_save";
 
 export function SaveSessionButton({
@@ -37,9 +61,18 @@ export function SaveSessionButton({
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("Untitled " + type);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Retrieve session using the better-auth client hook
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
 
+  /**
+   * handleSave: Communicates with the /api/sessions endpoint.
+   * If currentSessionId exists, the backend logic (implemented in the API route) 
+   * will handle it as an idempotent update.
+   * 
+   * @param customTitle Optional override for the session title.
+   */
   const handleSave = async (customTitle?: string) => {
     if (!session) return;
 
@@ -62,39 +95,58 @@ export function SaveSessionButton({
       const savedData = await resp.json();
       toast.success("Session saved successfully!");
       setIsOpen(false);
+      
+      // Clear persistence intent once successfully committed to DB
       localStorage.removeItem(AUTOSAVE_KEY);
 
       if (onSaveSuccess) {
         onSaveSuccess(savedData.id, savedData.title);
       } else {
+        // Fallback: Hard redirect to the workspace's persistent URL
         router.push(`/${type}/${savedData.id}`);
       }
     } catch (error) {
-      console.error(error);
-      toast.error("Error saving session");
+      console.error("Save Error:", error);
+      toast.error("Error saving session. Please check your connection.");
     } finally {
       setIsSaving(false);
     }
   };
 
-  // Handle auto-save after social login redirect
+  /**
+   * Auto-Persistence Hook:
+   * Triggers when the user returns to this page after a login redirect.
+   * If there's a pending save intent in localStorage, it executes handleSave immediately.
+   */
   useEffect(() => {
     if (session && !isPending) {
       const pending = localStorage.getItem(AUTOSAVE_KEY);
       if (pending) {
-        const { type: pType, title: pTitle } = JSON.parse(pending);
-        if (pType === type) {
-          handleSave(pTitle);
+        try {
+          const { type: pType, title: pTitle } = JSON.parse(pending);
+          // Ensure we only auto-save if we are in the correct workspace type
+          if (pType === type) {
+            handleSave(pTitle);
+          }
+        } catch (e) {
+          localStorage.removeItem(AUTOSAVE_KEY);
         }
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, isPending, type]);
 
+  /**
+   * Caches the user's intent to save before they leave the page to sign in.
+   */
   const prepareAutoSave = () => {
     localStorage.setItem(AUTOSAVE_KEY, JSON.stringify({ type, title }));
   };
 
+  /**
+   * Standard View: Simple button for users already editing an established session.
+   * Optimized for quick updates without disrupting the creative workflow.
+   */
   if (session && currentSessionId) {
     return (
       <Button
@@ -114,6 +166,10 @@ export function SaveSessionButton({
     );
   }
 
+  /**
+   * Dialog View: Full naming and auth-handling modal.
+   * Provides clarity to guest users that their data is protected during login.
+   */
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -128,15 +184,15 @@ export function SaveSessionButton({
           </span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] rounded-xl border shadow-2xl p-8">
+      <DialogContent className="sm:max-w-[425px] rounded-xl border shadow-2xl p-8 bg-background/95 backdrop-blur-xl">
         <DialogHeader>
-          <DialogTitle className="text-3xl font-black">
+          <DialogTitle className="text-3xl font-black tracking-tighter">
             Save Session
           </DialogTitle>
-          <DialogDescription className="font-medium text-muted-foreground pt-1">
+          <DialogDescription className="font-medium text-muted-foreground pt-1 italic">
             {session
-              ? "Give your session a name to easily find it later."
-              : "Set a title and sign in to persist your work."}
+              ? "Your work is about to be immortalized. Give it a name."
+              : "Axis saves your progress automatically after you sign in."}
           </DialogDescription>
         </DialogHeader>
 
@@ -144,16 +200,16 @@ export function SaveSessionButton({
           <div className="grid gap-2">
             <label
               htmlFor="title"
-              className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground/60 pl-1"
+              className="text-[10px] font-black uppercase tracking-[0.25em] text-muted-foreground pl-1"
             >
-              Title
+              Session Name
             </label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="My Brilliant Math"
-              className="rounded-lg h-14 text-lg font-bold border-border/50 focus-visible:ring-[#47CEAC]/30 bg-muted/20"
+              placeholder="e.g. My Integration Sandbox"
+              className="rounded-xl h-14 text-lg font-bold border-border/50 focus-visible:ring-[#47CEAC]/30 bg-muted/20"
             />
           </div>
         </div>
@@ -170,7 +226,7 @@ export function SaveSessionButton({
               ) : (
                 <Save size={20} />
               )}
-              Save Session
+              Save to Dashboard
             </Button>
           </DialogFooter>
         ) : (
@@ -184,11 +240,11 @@ export function SaveSessionButton({
                 href={`/sign-in?callbackURL=${encodeURIComponent(window.location.pathname)}`}
               >
                 <LogIn size={20} />
-                Sign in to Save
+                Sign in to Persist
               </Link>
             </Button>
-            <p className="text-[10px] text-center text-muted-foreground font-bold uppercase tracking-[0.1em] px-4">
-              Your data will be automatically saved after you sign in.
+            <p className="text-[10px] text-center text-muted-foreground font-black uppercase tracking-[0.1em] px-4 leading-relaxed">
+              We'll remember your status and save it the moment you're redirected back.
             </p>
           </div>
         )}

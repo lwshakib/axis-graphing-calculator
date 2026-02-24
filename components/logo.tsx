@@ -1,10 +1,17 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 
+/**
+ * Interface for the LogoIcon SVG component.
+ */
 interface LogoIconProps extends React.SVGProps<SVGSVGElement> {
-  className?: string;
+  className?: string; // Optional CSS classes for the SVG
 }
 
+/**
+ * Raw SVG component representing the Axis brand icon.
+ * Features a circular background with mathematical glyphs (+, -, x, /).
+ */
 export const LogoIcon: React.FC<LogoIconProps> = ({ className, ...props }) => {
   return (
     <svg
@@ -21,13 +28,13 @@ export const LogoIcon: React.FC<LogoIconProps> = ({ className, ...props }) => {
         strokeLinejoin="round"
       ></g>
       <g id="SVGRepo_iconCarrier">
-        {/* Background Circle */}
+        {/* Background Circle - Uses CSS variable for theme compatibility */}
         <path
           fill="var(--logo-primary, #47CEAC)"
           d="M512,256.006C512,397.402,397.394,512.004,256.004,512C114.606,512.004,0,397.402,0,256.006 C-0.007,114.61,114.606,0,256.004,0C397.394,0,512,114.614,512,256.006z"
         />
         <g>
-          {/* Main Teal Shapes (Secondary Accent) */}
+          {/* Main Teal Shapes (Secondary Accent/Depth layers) */}
           <path
             fill="var(--logo-secondary, #36BB9A)"
             d="M472.788,392.112c-0.034-0.026-0.054-0.064-0.09-0.09c-0.426-0.577-210.507-210.659-211.084-211.084 c-1.292-1.754-3.27-2.965-5.615-2.965c-3.917,0-7.093,3.172-7.093,7.093v94.922l-81.2,40.599c-3.505,1.753-4.925,6.013-3.172,9.518 c0.649,1.296,1.654,2.267,2.822,2.937c0.487,0.524,0.88,1.139,1.486,1.487c0.489,0.524,164.396,164.654,165.003,165.002 c0.094,0.101,0.197,0.181,0.286,0.286C392.078,481.266,441.001,442.638,472.788,392.112z"
@@ -42,7 +49,7 @@ export const LogoIcon: React.FC<LogoIconProps> = ({ className, ...props }) => {
           />
         </g>
         <g>
-          {/* White Foreground Icons */}
+          {/* White Foreground Icons (Math Symbols: +, -, x, /) */}
           <path
             fill="var(--logo-fg, #F4F6F9)"
             d="M344.292,320.589l-81.199-40.599v-94.923c0-3.921-3.177-7.093-7.093-7.093 c-3.917,0-7.093,3.172-7.093,7.093v94.922l-81.199,40.599c-3.505,1.753-4.925,6.013-3.172,9.518 c1.244,2.486,3.747,3.921,6.352,3.921c1.063,0,2.147-0.242,3.166-0.748L256,292.305l81.948,40.974 c1.019,0.506,2.102,0.748,3.166,0.748c2.605,0,5.108-1.434,6.352-3.921C349.218,326.602,347.797,322.341,344.292,320.589z"
@@ -65,11 +72,14 @@ export const LogoIcon: React.FC<LogoIconProps> = ({ className, ...props }) => {
   );
 };
 
+/**
+ * Composite Logo component that includes the icon and the brand text.
+ */
 interface LogoProps {
-  className?: string;
-  iconClassName?: string;
-  textClassName?: string;
-  showText?: boolean;
+  className?: string; // Container classes
+  iconClassName?: string; // Specific icon classes
+  textClassName?: string; // Brand text classes
+  showText?: boolean; // Toggle visibility of the "AXIS" text
 }
 
 export const Logo: React.FC<LogoProps> = ({

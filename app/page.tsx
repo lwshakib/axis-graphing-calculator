@@ -1,5 +1,12 @@
 "use client";
 
+/**
+ * Landing Page (Home Component): The primary portal to AXIS.
+ * Utilizes Framer Motion for sophisticated entering and scroll-based animations.
+ * Features a high-impact Hero, statistical proofs, interactive feature grid,
+ * and clear calls-to-action (CTA).
+ */
+
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import {
@@ -30,6 +37,8 @@ import { cn } from "@/lib/utils";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useRef } from "react";
 
+// --- Configuration ---
+/** Define core workspace features displayed in the interactive grid. */
 const features = [
   {
     title: "Graphing Workspace",
@@ -65,12 +74,13 @@ const features = [
   },
 ];
 
+// --- Animation Variants ---
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
     transition: {
-      staggerChildren: 0.1,
+      staggerChildren: 0.1, // Delays subsequent items for a wave effect
     },
   },
 };
@@ -89,11 +99,14 @@ const itemVariants = {
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Track scroll position for subtle parallax/fade effects on the hero
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
+  // Hero section fades out and moves up as the user scrolls down
   const opacity = useTransform(scrollYProgress, [0, 0.15], [1, 0]);
   const y = useTransform(scrollYProgress, [0, 0.15], [0, -20]);
 
@@ -102,9 +115,10 @@ export default function Home() {
       ref={containerRef}
       className="min-h-screen bg-background text-foreground transition-colors duration-500 overflow-x-hidden"
     >
-      {/* Hero Section */}
+      {/* --- Section: Hero --- */}
+      {/* High-impact hero section with a fading and moving effect on scroll. */}
       <section className="relative h-[95vh] flex items-center justify-center pt-20 overflow-hidden">
-        {/* Minimalist Background */}
+        {/* Background Grid & Radial Glow */}
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb),0.03),transparent_70%)]" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,rgba(128,128,128,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(128,128,128,0.05)_1px,transparent_1px)] bg-[size:40px_40px] [mask-image:radial-gradient(ellipse_60%_60%_at_50%_50%,#000_70%,transparent_100%)]" />
@@ -180,7 +194,8 @@ export default function Home() {
           </div>
         </motion.div>
 
-        {/* Scroll Indicator */}
+        {/* --- Scroll Indicator --- */}
+        {/* Visual cue for users to scroll down, animated to appear after hero content. */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -194,7 +209,8 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Trust Line - More Minimal */}
+      {/* --- Section: Stats/Social Proof --- */}
+      {/* Displays key performance indicators or "trust" metrics in a minimalist grid. */}
       <section className="py-12 border-y border-border/40 bg-muted/5">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -217,7 +233,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Grid */}
+      {/* --- Section: Integrated Features Grid --- */}
+      {/* Showcases core features with interactive cards, animated on scroll into view. */}
       <section className="py-32 bg-background">
         <div className="container mx-auto px-6">
           <div className="max-w-2xl mb-24">
@@ -277,7 +294,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Workflow Visualization - Simplified & Minimal */}
+      {/* --- Section: Core Technologies Section --- */}
+      {/* Details the underlying technologies and workflow benefits, with a visual animation. */}
       <section className="py-32 relative overflow-hidden bg-muted/20">
         <div className="container mx-auto px-6 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
@@ -322,6 +340,7 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Interactive/Animated Visualization of Sampling */}
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               whileInView={{ opacity: 1, scale: 1 }}
@@ -379,7 +398,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Final CTA / Minimal Footer Top */}
+      {/* --- Section: Final CTA Area --- */}
+      {/* A concluding call-to-action encouraging users to start exploring or create an account. */}
       <section className="py-32 border-t border-border/40">
         <div className="container mx-auto px-6 text-center max-w-2xl">
           <h2 className="text-3xl md:text-5xl font-bold tracking-tight mb-8">
@@ -405,10 +425,12 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer - Professional & Minimal */}
+      {/* --- Footer Area --- */}
+      {/* Professional and minimalist footer with branding, navigation, and legal links. */}
       <footer className="py-20 border-t border-border/40 bg-background/50 backdrop-blur-sm">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-start gap-12 mb-20">
+            {/* Branding and Socials */}
             <div className="space-y-6">
               <Logo iconClassName="w-10 h-10" textClassName="text-3xl" />
               <p className="max-w-xs text-base text-muted-foreground leading-relaxed">
@@ -428,6 +450,7 @@ export default function Home() {
               </div>
             </div>
 
+            {/* Sitemap Navigation */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-16">
               <div className="space-y-6">
                 <h4 className="text-xs font-bold uppercase tracking-widest text-muted-foreground/50">
@@ -468,6 +491,7 @@ export default function Home() {
             </div>
           </div>
 
+          {/* Bottom attribution and secondary links */}
           <div className="pt-8 border-t border-border/20 flex flex-col sm:flex-row justify-between items-center gap-6">
             <p className="text-xs text-muted-foreground font-medium">
               © 2026 AXIS Labs. Compiled with precision.

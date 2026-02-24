@@ -1,10 +1,17 @@
 "use client";
 
+/**
+ * Navbar component for the Axis Graphing Calculator application.
+ * Provides main navigation links, user account management, and theme toggling.
+ * Glassmorphic design with active link animations.
+ */
+
 import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Logo } from "@/components/logo";
 import { cn } from "@/lib/utils";
+// Import icons from Lucide library
 import {
   Calculator,
   FunctionSquare,
@@ -20,9 +27,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // For smooth UI transitions
 import { UserAccount } from "@/components/user-account";
 
+/**
+ * Definition of main navigation routes.
+ */
 const navItems = [
   {
     name: "Graphing",
@@ -43,16 +53,17 @@ const navItems = [
 ];
 
 export function Navbar() {
-  const pathname = usePathname();
+  const pathname = usePathname(); // Get current active route for highlighting
 
   return (
     <nav className="fixed top-0 left-0 right-0 h-14 bg-background/80 backdrop-blur-md border-b z-50 flex items-center justify-between px-4 sm:px-8">
+      {/* Brand Logo and Primary Desktop Links */}
       <div className="flex items-center gap-8">
         <Link href="/">
           <Logo iconClassName="w-7 h-7" textClassName="text-lg" />
         </Link>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Navigation: Hidden on small screens */}
         <div className="hidden md:flex items-center gap-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -68,6 +79,7 @@ export function Navbar() {
                     : "text-muted-foreground hover:text-foreground",
                 )}
               >
+                {/* Active Indicator: Smoothly slides between buttons using layoutId */}
                 {isActive && (
                   <motion.div
                     layoutId="active-nav-pill"
@@ -91,12 +103,14 @@ export function Navbar() {
         </div>
       </div>
 
+      {/* Right Side Tools: Account, Mobile Menu, Theme, Settings */}
       <div className="flex items-center gap-4">
+        {/* User Profile Hookup: Visible on desktop */}
         <div className="hidden sm:flex items-center gap-2">
           <UserAccount />
         </div>
 
-        {/* Mobile Menu */}
+        {/* Mobile Menu: Renders as a dropdown for space efficiency */}
         <div className="md:hidden">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -137,6 +151,7 @@ export function Navbar() {
                   </DropdownMenuItem>
                 );
               })}
+              {/* Profile Link inside Mobile Menu for narrow screens */}
               <div className="h-px bg-muted/50 my-2 sm:hidden mx-2" />
               <DropdownMenuItem asChild className="sm:hidden rounded-lg">
                 <UserAccount />
@@ -145,8 +160,10 @@ export function Navbar() {
           </DropdownMenu>
         </div>
 
+        {/* Light/Dark Mode Switch */}
         <ThemeToggle />
 
+        {/* Global Settings Trigger */}
         <Button
           variant="ghost"
           size="icon-sm"
