@@ -8,8 +8,10 @@ const math = create(all);
  */
 
 // Store for matrix variables and other user-defined variables
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 let variableScope: Record<string, any> = {};
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setVariable(name: string, value: any) {
   variableScope[name] = value;
 }
@@ -24,6 +26,7 @@ export function clearScope() {
 
 // Custom Numerical Integration (Definite): integrate(f(x), a, b)
 function internalIntegrate(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fExpr: any,
   a: number,
   b: number,
@@ -32,7 +35,8 @@ function internalIntegrate(
   // If fExpr is a function (passed by mathjs), use it directly
   const f =
     typeof fExpr === "function"
-      ? (scope: any) => fExpr(scope.x)
+      ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (scope: any) => fExpr(scope.x)
       : compileMath(fExpr.toString());
 
   const h = (b - a) / steps;
@@ -68,6 +72,7 @@ math.import(
 /**
  * Evaluates a mathematical expression using math.js.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function evaluateMath(expression: string, scope?: Record<string, any>) {
   if (!expression || expression.trim() === "") return 0;
 
@@ -245,6 +250,7 @@ export function compileMath(expression: string) {
 
     const node = math.parse(normalized);
     const code = node.compile();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (scope?: Record<string, any>) =>
       code.evaluate(scope || variableScope);
   } catch (error) {
@@ -281,6 +287,7 @@ export function integrate(
  * Formats a mathjs result for display.
  * Handles numbers, matrices, and units.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function formatResult(result: any): string {
   if (result === undefined || result === null) return "0";
 

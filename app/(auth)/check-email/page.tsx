@@ -25,7 +25,7 @@ export default function CheckEmailPage() {
           Check your email
         </CardTitle>
         <CardDescription className="text-base text-balance">
-          We've sent a verification link to your email address.
+          We&apos;ve sent a verification link to your email address.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-center">
@@ -33,8 +33,8 @@ export default function CheckEmailPage() {
           Please click the link in the email to verify your account.
           <br />
           <strong className="text-foreground">
-            Note: If you don't verify your email, you will not be able to log
-            in.
+            Note: If you don&apos;t verify your email, you will not be able to
+            log in.
           </strong>
         </p>
         <Button asChild className="w-full">

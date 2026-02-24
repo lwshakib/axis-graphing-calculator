@@ -1,7 +1,7 @@
 "use client";
 
-import { ThreeDWorkspace } from "@/components/three-d-workspace";
+import { ThreeDWorkspaceWrapper } from "@/components/three-d-workspace-wrapper";
 
 export default function ThreeDPlotterPage() {
-  return <ThreeDWorkspace />;
+  return <ThreeDWorkspaceWrapper />;
 }

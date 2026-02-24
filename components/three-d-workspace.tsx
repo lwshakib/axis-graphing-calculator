@@ -8,14 +8,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Plus,
-  X,
-  Settings,
   RotateCcw,
   ChevronLeft,
   ChevronRight,
-  Box,
-  Move,
-  Maximize2,
   Trash2,
   Eye,
   EyeOff,
@@ -110,6 +105,7 @@ export function ThreeDWorkspace({
   useEffect(() => {
     if (!containerRef.current) return;
 
+    const container = containerRef.current;
     const scene = new THREE.Scene();
     sceneRef.current = scene;
 
@@ -188,12 +184,15 @@ export function ThreeDWorkspace({
     return () => {
       window.removeEventListener("resize", handleResize);
       renderer.dispose();
-      if (containerRef.current) {
+      if (container) {
         try {
-          containerRef.current.removeChild(renderer.domElement);
-        } catch (e) {}
+          container.removeChild(renderer.domElement);
+        } catch {
+          // element may already be removed
+        }
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -224,6 +223,7 @@ export function ThreeDWorkspace({
     const group = objectsGroupRef.current;
 
     while (group.children.length > 0) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const child = group.children[0] as any;
       if (child.geometry) child.geometry.dispose();
       if (child.material) child.material.dispose();
@@ -300,7 +300,9 @@ export function ThreeDWorkspace({
         });
         line.rotation.x = -Math.PI / 2;
         group.add(line);
-      } catch (e) {}
+      } catch {
+        // expression failed to compile/evaluate, skip silently
+      }
     });
   }, [vectors, surfaces]);
 
@@ -331,12 +333,14 @@ export function ThreeDWorkspace({
     ]);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateVector = (id: string, field: keyof Vector3D, value: any) => {
     setVectors(
       vectors.map((v) => (v.id === id ? { ...v, [field]: value } : v)),
     );
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSurface = (id: string, field: keyof Surface3D, value: any) => {
     setSurfaces(
       surfaces.map((s) => (s.id === id ? { ...s, [field]: value } : s)),

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { GraphWorkspace } from "@/components/graph-workspace";
+import { GraphWorkspaceWrapper } from "@/components/graph-workspace-wrapper";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -18,10 +18,11 @@ export default async function SavedGraphPage({ params }: PageProps) {
   }
 
   // Type safe parsing of data
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = savedSession.data as any;
 
   return (
-    <GraphWorkspace
+    <GraphWorkspaceWrapper
       sessionId={id}
       initialData={{
         equations: data.equations,

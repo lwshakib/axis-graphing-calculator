@@ -4,16 +4,11 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   Plus,
   X,
-  Settings,
   RotateCcw,
   ChevronLeft,
   ChevronRight,
   Keyboard,
-  Save,
-  LogIn,
-  Trash2,
   Edit3,
-  Loader2,
   Eye,
   EyeOff,
 } from "lucide-react";
@@ -275,7 +270,6 @@ export function GraphWorkspace({
       try {
         const f = compileMath(eq.expression);
         let first = true;
-        let prevX: number | null = null;
         let prevYValue: number | null = null;
         let prevSy: number | null = null;
 
@@ -324,7 +318,9 @@ export function GraphWorkspace({
           }
         }
         ctx.stroke();
-      } catch (err) {}
+      } catch {
+        // expression failed to compile/evaluate, skip silently
+      }
     });
   }, [viewport, equations, isDark]);
 

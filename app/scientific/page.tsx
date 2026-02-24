@@ -1,7 +1,7 @@
 "use client";
 
-import { ScientificWorkspace } from "@/components/scientific-workspace";
+import { ScientificWorkspaceWrapper } from "@/components/scientific-workspace-wrapper";
 
 export default function ScientificCalculatorPage() {
-  return <ScientificWorkspace />;
+  return <ScientificWorkspaceWrapper />;
 }

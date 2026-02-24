@@ -1,7 +1,7 @@
 "use client";
 
-import { GraphWorkspace } from "@/components/graph-workspace";
+import { GraphWorkspaceWrapper } from "@/components/graph-workspace-wrapper";
 
 export default function GraphPage() {
-  return <GraphWorkspace />;
+  return <GraphWorkspaceWrapper />;
 }

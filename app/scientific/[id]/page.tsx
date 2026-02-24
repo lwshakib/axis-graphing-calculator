@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { ScientificWorkspace } from "@/components/scientific-workspace";
+import { ScientificWorkspaceWrapper } from "@/components/scientific-workspace-wrapper";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,10 +17,11 @@ export default async function SavedScientificPage({ params }: PageProps) {
     return notFound();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = savedSession.data as any;
 
   return (
-    <ScientificWorkspace
+    <ScientificWorkspaceWrapper
       sessionId={id}
       initialData={{
         variables: data.variables,

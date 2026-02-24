@@ -34,7 +34,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
@@ -44,6 +44,7 @@ interface SavedSession {
   title: string;
   type: string;
   updatedAt: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
 }
 
@@ -85,7 +86,7 @@ export default function DashboardPage() {
         const data = await res.json();
         setSessions(data);
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to load sessions");
     } finally {
       setLoading(false);
@@ -107,7 +108,7 @@ export default function DashboardPage() {
       } else {
         throw new Error();
       }
-    } catch (error) {
+    } catch {
       toast.error("Failed to delete session");
     }
   };
@@ -274,7 +275,9 @@ export default function DashboardPage() {
                         {/* Visual placeholder for the session type */}
                         <div className="opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500 transform">
                           {React.cloneElement(
-                            typeIcons[session.type] as React.ReactElement<any>,
+                            typeIcons[session.type] as React.ReactElement<
+                              Record<string, unknown>
+                            >,
                             { size: 100 },
                           )}
                         </div>

@@ -28,7 +28,7 @@ export default function SignUpPage() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await authClient.signUp.email(
+    await authClient.signUp.email(
       {
         email,
         password,

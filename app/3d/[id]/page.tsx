@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { ThreeDWorkspace } from "@/components/three-d-workspace";
+import { ThreeDWorkspaceWrapper } from "@/components/three-d-workspace-wrapper";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,10 +17,11 @@ export default async function SavedThreeDPage({ params }: PageProps) {
     return notFound();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = savedSession.data as any;
 
   return (
-    <ThreeDWorkspace
+    <ThreeDWorkspaceWrapper
       sessionId={id}
       initialData={{
         vectors: data.vectors,

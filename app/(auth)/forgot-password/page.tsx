@@ -25,7 +25,7 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await authClient.requestPasswordReset(
+    await authClient.requestPasswordReset(
       {
         email,
         redirectTo: "/reset-password",
@@ -58,16 +58,25 @@ export default function ForgotPasswordPage() {
             Check your email
           </CardTitle>
           <CardDescription className="text-base">
-            We've sent a password reset link to{" "}
+            We&apos;ve sent a password reset link to{" "}
             <span className="font-medium text-foreground">{email}</span>.
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <p className="text-sm text-muted-foreground">
-            If you don't see it, please check your spam folder.
+            If you don&apos;t see it, please check your spam folder.
           </p>
         </CardContent>
-        <CardFooter>
+        <CardFooter className="flex flex-col gap-3">
+          <Button asChild className="w-full">
+            <a
+              href="https://mail.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open Gmail
+            </a>
+          </Button>
           <Button asChild variant="outline" className="w-full">
             <Link href="/sign-in" className="flex items-center justify-center">
               <ArrowLeft className="mr-2 h-4 w-4" /> Back to Login
@@ -85,7 +94,7 @@ export default function ForgotPasswordPage() {
           Forgot password?
         </CardTitle>
         <CardDescription>
-          Enter your email address and we'll send you a link to reset your
+          Enter your email address and we&apos;ll send you a link to reset your
           password.
         </CardDescription>
       </CardHeader>

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import prisma from "@/lib/prisma";
-import { CalculatorWorkspace } from "@/components/calculator-workspace";
+import { CalculatorWorkspaceWrapper } from "@/components/calculator-workspace-wrapper";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -17,10 +17,11 @@ export default async function SavedCalculatorPage({ params }: PageProps) {
     return notFound();
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = savedSession.data as any;
 
   return (
-    <CalculatorWorkspace
+    <CalculatorWorkspaceWrapper
       sessionId={id}
       initialData={{
         display: data.display,

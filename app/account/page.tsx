@@ -13,12 +13,8 @@ import {
   Smartphone,
   LogOut,
   Loader2,
-  ArrowLeft,
-  Github,
   AlertTriangle,
-  Trash2,
 } from "lucide-react";
-import Link from "next/link";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +28,24 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { UserAccount } from "@/components/user-account";
+
+interface SessionItem {
+  id: string;
+  userAgent?: string;
+  ipAddress?: string;
+}
+
+interface AccountItem {
+  id: string;
+  providerId: string;
+}
+
+interface UserWithProvider {
+  name?: string | null;
+  email?: string;
+  image?: string | null;
+  provider?: string;
+}
 
 export default function AccountPage() {
   const {
@@ -42,8 +55,8 @@ export default function AccountPage() {
   } = authClient.useSession();
 
   // Local state for fetched data instead of reactive hooks
-  const [sessions, setSessions] = useState<any[]>([]);
-  const [accounts, setAccounts] = useState<any[]>([]);
+  const [sessions, setSessions] = useState<SessionItem[]>([]);
+  const [accounts, setAccounts] = useState<AccountItem[]>([]);
   const [isSessionsLoading, setIsSessionsLoading] = useState(true);
   const [isAccountsLoading, setIsAccountsLoading] = useState(true);
   const [revokingId, setRevokingId] = useState<string | null>(null);
@@ -63,6 +76,7 @@ export default function AccountPage() {
   const fetchSessions = async () => {
     setIsSessionsLoading(true);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = await (authClient as any).listSessions();
       if (res.data) {
         setSessions(res.data);
@@ -77,6 +91,7 @@ export default function AccountPage() {
   const fetchAccounts = async () => {
     setIsAccountsLoading(true);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const res = await (authClient as any).listAccounts();
       if (res.data) {
         setAccounts(res.data);
@@ -127,7 +142,7 @@ export default function AccountPage() {
       });
       toast.success("Profile updated");
       refetchSession();
-    } catch (_error) {
+    } catch {
       toast.error("Failed to update profile");
     } finally {
       setIsUpdatingName(false);
@@ -151,8 +166,10 @@ export default function AccountPage() {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update password");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Failed to update password";
+      toast.error(message);
     } finally {
       setIsUpdatingPassword(false);
     }
@@ -161,25 +178,26 @@ export default function AccountPage() {
   const handleRevokeSession = async (id: string) => {
     setRevokingId(id);
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (authClient as any).revokeSession({
         id,
       });
       toast.success("Session revoked");
       fetchSessions();
-    } catch (_error) {
+    } catch {
       toast.error("Failed to revoke session");
     } finally {
       setRevokingId(null);
     }
   };
 
-  const handleLinkAccount = async (provider: "google" | "github") => {
+  const handleLinkAccount = async (provider: "google") => {
     try {
       await authClient.signIn.social({
         provider,
         callbackURL: "/account",
       });
-    } catch (_error) {
+    } catch {
       toast.error(`Failed to link ${provider} account`);
     }
   };
@@ -206,12 +224,13 @@ export default function AccountPage() {
 
   const handleUnlinkAccount = async (id: string) => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       await (authClient as any).unlinkAccount({
         accountRecordId: id,
       });
       toast.success("Account unlinked");
       fetchAccounts();
-    } catch (_error) {
+    } catch {
       toast.error("Failed to unlink account");
     }
   };
@@ -219,28 +238,13 @@ export default function AccountPage() {
   // Improved linked check that includes the current session's provider
   const isProviderLinked = (provider: string) => {
     // Check if the current user's initial provider matches
-    if ((user as any).provider === provider) return true;
+    if ((user as UserWithProvider).provider === provider) return true;
     // Check the accounts table
-    return accounts?.some((acc: any) => acc.providerId === provider);
+    return accounts?.some((acc) => acc.providerId === provider);
   };
 
   return (
     <div className="bg-background text-foreground selection:bg-primary/30 min-h-screen font-sans transition-colors duration-500">
-      <header className="bg-background/80 border-border/50 sticky top-0 z-50 flex w-full items-center justify-between border-b px-6 py-2 backdrop-blur-md">
-        <div className="flex items-center gap-4">
-          <Link
-            href="/"
-            className="text-muted-foreground hover:text-foreground group inline-flex items-center gap-2 py-1 text-sm font-bold transition-all"
-          >
-            <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-            Back to Dashboard
-          </Link>
-        </div>
-        <div className="flex items-center gap-4">
-          <UserAccount />
-        </div>
-      </header>
-
       <div className="mx-auto max-w-4xl px-6 py-12">
         <div className="grid grid-cols-1 gap-16 lg:grid-cols-12">
           {/* Sidebar / Profile Info */}
@@ -355,7 +359,7 @@ export default function AccountPage() {
                         ))}
                       </div>
                     ) : (
-                      ["google", "github"].map((provider) => {
+                      ["google"].map((provider) => {
                         const isLinked = isProviderLinked(provider);
                         return (
                           <div
@@ -364,7 +368,7 @@ export default function AccountPage() {
                           >
                             <div className="flex items-center gap-4">
                               <div className="bg-background border-border flex h-10 w-10 items-center justify-center rounded-xl border shadow-sm">
-                                {provider === "google" ? (
+                                {provider === "google" && (
                                   <Image
                                     src="https://www.svgrepo.com/show/475656/google-color.svg"
                                     alt="google"
@@ -372,8 +376,6 @@ export default function AccountPage() {
                                     height={20}
                                     className="h-5 w-5"
                                   />
-                                ) : (
-                                  <Github className="text-foreground h-5 w-5" />
                                 )}
                               </div>
                               <div>
@@ -393,14 +395,14 @@ export default function AccountPage() {
                                   Active
                                 </span>
                                 {accounts?.some(
-                                  (a: any) => a.providerId === provider,
+                                  (a) => a.providerId === provider,
                                 ) && (
                                   <Button
                                     variant="ghost"
                                     size="sm"
                                     onClick={() => {
                                       const acc = accounts?.find(
-                                        (a: any) => a.providerId === provider,
+                                        (a) => a.providerId === provider,
                                       );
                                       if (acc) handleUnlinkAccount(acc.id);
                                     }}
@@ -415,7 +417,7 @@ export default function AccountPage() {
                                 variant="outline"
                                 size="sm"
                                 onClick={() =>
-                                  handleLinkAccount(provider as any)
+                                  handleLinkAccount(provider as "google")
                                 }
                                 className="border-border bg-background hover:bg-secondary h-8 rounded-lg px-4 text-[10px] font-bold"
                               >
@@ -511,7 +513,7 @@ export default function AccountPage() {
                     <Loader2 className="h-6 w-6 animate-spin text-zinc-800" />
                   </div>
                 ) : sessions.length > 0 ? (
-                  sessions.map((s: any) => (
+                  sessions.map((s) => (
                     <div
                       key={s.id}
                       className="border-border/60 bg-secondary/30 group hover:bg-secondary/50 flex items-center justify-between rounded-2xl border p-5 backdrop-blur-sm transition-all"

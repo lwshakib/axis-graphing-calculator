@@ -2,18 +2,7 @@
 
 import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
-import {
-  Delete,
-  RotateCcw,
-  Percent,
-  Divide,
-  X,
-  Minus,
-  Plus,
-  Equal,
-  Edit3,
-} from "lucide-react";
+import { Percent, Divide, X, Minus, Plus, Equal, Edit3 } from "lucide-react";
 import { evaluateMath } from "@/lib/math-parser";
 import { SaveSessionButton } from "@/components/save-session-button";
 import { useRouter } from "next/navigation";
@@ -64,7 +53,7 @@ export function CalculatorWorkspace({
       setDisplay(String(Number(result.toFixed(8))));
       setEquation("");
       setIsResult(true);
-    } catch (error) {
+    } catch {
       setDisplay("Error");
     }
   };

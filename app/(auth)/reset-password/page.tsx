@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import {
   Card,
@@ -21,7 +21,6 @@ import Link from "next/link";
 function ResetPasswordContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  const router = useRouter();
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -41,7 +40,7 @@ function ResetPasswordContent() {
     }
 
     setLoading(true);
-    const { error } = await authClient.resetPassword(
+    await authClient.resetPassword(
       {
         newPassword: password,
         token,

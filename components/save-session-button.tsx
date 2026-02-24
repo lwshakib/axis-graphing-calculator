@@ -20,6 +20,7 @@ import { toast } from "sonner";
 
 interface SaveSessionButtonProps {
   type: "graph" | "calculator" | "scientific" | "3d";
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
   currentSessionId?: string;
   onSaveSuccess?: (id: string, title: string) => void;
@@ -87,6 +88,7 @@ export function SaveSessionButton({
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session, isPending, type]);
 
   const prepareAutoSave = () => {

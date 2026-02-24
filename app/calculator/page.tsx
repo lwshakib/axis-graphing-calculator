@@ -1,7 +1,7 @@
 "use client";
 
-import { CalculatorWorkspace } from "@/components/calculator-workspace";
+import { CalculatorWorkspaceWrapper } from "@/components/calculator-workspace-wrapper";
 
 export default function CalculatorPage() {
-  return <CalculatorWorkspace />;
+  return <CalculatorWorkspaceWrapper />;
 }

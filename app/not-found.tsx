@@ -3,7 +3,7 @@
 import React from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { MoveLeft, Home, Calculator, Sparkles } from "lucide-react";
+import { Home, Calculator, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 
 export default function NotFound() {
@@ -46,7 +46,8 @@ export default function NotFound() {
             Equation Not Found
           </h2>
           <p className="text-muted-foreground text-lg md:text-xl font-medium max-w-md mx-auto">
-            It seems this coordinate doesn't exist in our mathematical universe.
+            It seems this coordinate doesn&apos;t exist in our mathematical
+            universe.
           </p>
         </motion.div>
 

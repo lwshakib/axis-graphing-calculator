@@ -8,21 +8,13 @@ import {
   Grid3X3,
   Variable,
   Equal,
-  Trash2,
   Settings2,
   History,
   Info,
   Sigma,
   Edit3,
 } from "lucide-react";
-import {
-  evaluateMath,
-  formatResult,
-  setVariable,
-  derivative,
-  simplify,
-  integrate,
-} from "@/lib/math-parser";
+import { evaluateMath, formatResult, setVariable } from "@/lib/math-parser";
 import {
   Dialog,
   DialogContent,
@@ -44,18 +36,24 @@ import { useRouter } from "next/navigation";
 import "mathlive";
 import { MathfieldElement } from "mathlive";
 
-// @ts-ignore
-const MathField = React.forwardRef<MathfieldElement, any>((props, ref) => {
-  // @ts-ignore
-  return <math-field {...props} ref={ref} />;
-});
+const MathField = React.forwardRef<MathfieldElement, Record<string, unknown>>(
+  (props, ref) => {
+    // @ts-expect-error math-field is a web component from MathLive
+    return <math-field {...props} ref={ref} />;
+  },
+);
+MathField.displayName = "MathField";
 
-function MatrixRenderer({ data }: { data: any[][] | any }) {
-  const matrix = Array.isArray(data)
+function MatrixRenderer({
+  data,
+}: {
+  data: unknown[][] | { isMatrix?: boolean; toArray?: () => unknown[][] };
+}) {
+  const matrix: unknown[][] = Array.isArray(data)
     ? data
-    : data.toArray
-      ? data.toArray()
-      : [data];
+    : (data as { toArray?: () => unknown[][] }).toArray
+      ? (data as { toArray: () => unknown[][] }).toArray()
+      : [data as unknown[]];
 
   return (
     <div className="inline-flex items-stretch gap-2 my-2 py-1">
@@ -68,7 +66,7 @@ function MatrixRenderer({ data }: { data: any[][] | any }) {
           gridTemplateColumns: `repeat(${Array.isArray(matrix[0]) ? matrix[0].length : 1}, auto)`,
         }}
       >
-        {matrix.flat().map((cell: any, i: number) => (
+        {matrix.flat().map((cell: unknown, i: number) => (
           <div
             key={i}
             className="text-center font-mono text-base md:text-lg px-2 font-bold text-zinc-800 dark:text-zinc-200"
@@ -87,6 +85,7 @@ function MatrixRenderer({ data }: { data: any[][] | any }) {
 interface ScientificWorkspaceProps {
   initialData?: {
     variables: Record<string, string>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     history: { expr: string; res: any }[];
     title: string;
   };
@@ -100,12 +99,14 @@ export function ScientificWorkspace({
   const mfRef = useRef<MathfieldElement>(null);
   const [mounted, setMounted] = useState(false);
   const [equation, setEquation] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [variables, setVariablesList] = useState<Record<string, string>>(
     initialData?.variables || {},
   );
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [history, setHistoryList] = useState<{ expr: string; res: any }[]>(
     initialData?.history || [],
   );
@@ -126,7 +127,11 @@ export function ScientificWorkspace({
   ]);
   const [matrixVarName, setMatrixVarName] = useState("A");
 
+  const mountedRef = useRef(false);
+
   useEffect(() => {
+    mountedRef.current = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
     if (mfRef.current) {
       const mf = mfRef.current;
@@ -138,10 +143,7 @@ export function ScientificWorkspace({
     }
   }, []);
 
-  const insertAtCursor = (
-    content: string,
-    options: { latex?: boolean } = {},
-  ) => {
+  const insertAtCursor = (content: string) => {
     if (mfRef.current) {
       mfRef.current.insert(content, { focus: true });
       setError(null);
@@ -196,8 +198,9 @@ export function ScientificWorkspace({
         [{ expr: latex, res: res }, ...prev].slice(0, 5),
       );
       setError(null);
-    } catch (e: any) {
-      setError(e.message || "Math Error");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : "Math Error";
+      setError(message);
       setResult(null);
     }
   };
@@ -279,7 +282,7 @@ export function ScientificWorkspace({
               {Object.keys(variables).length === 0 ? (
                 <div className="bg-zinc-100/50 dark:bg-zinc-800/30 p-3 rounded-xl border border-dashed border-zinc-200 dark:border-zinc-700">
                   <p className="text-zinc-400 text-[10px] text-center italic">
-                    Type "A = 10" to save
+                    Type &quot;A = 10&quot; to save
                   </p>
                 </div>
               ) : (

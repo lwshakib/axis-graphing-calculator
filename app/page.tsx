@@ -7,11 +7,7 @@ import {
   LayoutGrid,
   FunctionSquare,
   ArrowRight,
-  Zap,
   Box,
-  Layers,
-  MousePointer2,
-  FileCode,
   Github,
   Twitter,
   Linkedin,
@@ -19,9 +15,7 @@ import {
   Command,
   Cloud,
   Cpu,
-  Fingerprint,
   Activity,
-  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

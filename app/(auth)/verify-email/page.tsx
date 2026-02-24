@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, Suspense } from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import {
   Card,
@@ -19,15 +19,16 @@ import { toast } from "sonner";
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
+  const initialStatus = token ? "loading" : "error";
+  const initialMessage = token ? "" : "Missing verification token.";
+
   const [status, setStatus] = useState<"loading" | "success" | "error">(
-    "loading",
+    initialStatus,
   );
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState(initialMessage);
 
   useEffect(() => {
     if (!token) {
-      setStatus("error");
-      setMessage("Missing verification token.");
       return;
     }
 

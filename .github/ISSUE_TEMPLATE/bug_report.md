@@ -29,5 +29,8 @@ If applicable, add screenshots to help explain your problem.
 - Browser: [e.g. Chrome, Safari]
 - Node.js Version: [e.g. v20.x]
 
+**Testing**
+Have you run the tests? If so, please provide the output of `bun run test` or `bun run test:e2e`.
+
 **Additional context**
 Add any other context about the problem here.

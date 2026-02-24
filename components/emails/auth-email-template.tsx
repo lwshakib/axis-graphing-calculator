@@ -5,7 +5,6 @@ import {
   Container,
   Head,
   Heading,
-  Hr,
   Html,
   Link,
   Preview,
@@ -50,8 +49,8 @@ export function AuthEmailTemplate({ type, url }: AuthEmailTemplateProps) {
             </Section>
             <Section className="mt-8 pt-8 border-t border-gray-200">
               <Text className="text-sm text-gray-500 mb-2">
-                If the button doesn't work, you can copy and paste this link
-                into your browser:
+                If the button doesn&apos;t work, you can copy and paste this
+                link into your browser:
               </Text>
               <Link href={url} className="text-xs text-blue-600 break-all">
                 {url}
