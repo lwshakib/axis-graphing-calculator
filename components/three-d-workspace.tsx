@@ -412,16 +412,22 @@ export function ThreeDWorkspace({
   };
 
   /** Updates attributes of a vector, ensuring type safety for field indexing. */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateVector = (id: string, field: keyof Vector3D, value: any) => {
+  const updateVector = (
+    id: string,
+    field: keyof Vector3D,
+    value: string | boolean,
+  ) => {
     setVectors(
       vectors.map((v) => (v.id === id ? { ...v, [field]: value } : v)),
     );
   };
 
   /** Updates attributes of a surface. */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateSurface = (id: string, field: keyof Surface3D, value: any) => {
+  const updateSurface = (
+    id: string,
+    field: keyof Surface3D,
+    value: string | boolean,
+  ) => {
     setSurfaces(
       surfaces.map((s) => (s.id === id ? { ...s, [field]: value } : s)),
     );
@@ -594,15 +600,19 @@ export function ThreeDWorkspace({
                           {axis}
                         </label>
                         <Input
-                          value={(v as any)[axis]}
+                          value={v[axis as keyof Vector3D] as string}
                           onChange={(e) =>
-                            updateVector(v.id, axis as any, e.target.value)
+                            updateVector(
+                              v.id,
+                              axis as keyof Vector3D,
+                              e.target.value,
+                            )
                           }
                           onFocus={() =>
                             setActiveInput({
                               type: "vector",
                               id: v.id,
-                              field: axis as any,
+                              field: axis as keyof Vector3D,
                             })
                           }
                           className="h-8 text-center bg-transparent border-none shadow-none rounded-none font-mono text-xs"

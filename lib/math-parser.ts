@@ -214,7 +214,7 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
     if (result && typeof result === "object" && result.isNode) {
       try {
         return result.evaluate(scope || variableScope);
-      } catch (err) {
+      } catch {
         return result;
       }
     }

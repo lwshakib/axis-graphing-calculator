@@ -147,7 +147,6 @@ export function ScientificWorkspace({
   );
 
   const mathFieldRef = useRef<MathfieldElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   // Matrix Editor State
@@ -165,7 +164,10 @@ export function ScientificWorkspace({
 
   useEffect(() => {
     mountedRef.current = true;
-    setMounted(true);
+    // Use requestAnimationFrame to avoid synchronous setState in effect
+    requestAnimationFrame(() => {
+      setMounted(true);
+    });
     if (mathFieldRef.current) {
       const mf = mathFieldRef.current;
       mf.mathVirtualKeyboardPolicy = "manual";
@@ -525,9 +527,18 @@ export function ScientificWorkspace({
                     <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 animate-in fade-in slide-in-from-right-4">
                       {result &&
                       ((typeof result === "object" &&
-                        (result as any).isMatrix) ||
+                        (result as { isMatrix?: boolean }).isMatrix) ||
                         Array.isArray(result)) ? (
-                        <MatrixRenderer data={result as any} />
+                        <MatrixRenderer
+                          data={
+                            result as
+                              | unknown[][]
+                              | {
+                                  isMatrix?: boolean;
+                                  toArray?: () => unknown[][];
+                                }
+                          }
+                        />
                       ) : (
                         <>
                           <span className="text-3xl font-black tracking-tight">

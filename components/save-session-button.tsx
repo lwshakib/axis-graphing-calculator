@@ -38,8 +38,7 @@ interface SaveSessionButtonProps {
   /** The specific workspace module generating the data. */
   type: "graph" | "calculator" | "scientific" | "3d";
   /** The state object (equations, viewport, matrices, etc.) to be JSON serialized. */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any;
+  data: unknown;
   /** Optional: The UUID of an existing session. If provided, the button performs an update instead of a create. */
   currentSessionId?: string;
   /** Callback triggered after a successful server-side save. */
@@ -128,7 +127,7 @@ export function SaveSessionButton({
           if (pType === type) {
             handleSave(pTitle);
           }
-        } catch (e) {
+        } catch {
           localStorage.removeItem(AUTOSAVE_KEY);
         }
       }
@@ -244,7 +243,7 @@ export function SaveSessionButton({
               </Link>
             </Button>
             <p className="text-[10px] text-center text-muted-foreground font-black uppercase tracking-[0.1em] px-4 leading-relaxed">
-              We'll remember your status and save it the moment you're
+              We&apos;ll remember your status and save it the moment you&apos;re
               redirected back.
             </p>
           </div>

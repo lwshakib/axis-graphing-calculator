@@ -89,8 +89,8 @@ export default function ForgotPasswordPage() {
         </CardHeader>
         <CardContent className="text-center">
           <p className="text-sm text-muted-foreground/80 leading-relaxed px-4">
-            The link is valid for 1 hour. If you don't receive it shortly, check
-            your spam folder or try again.
+            The link is valid for 1 hour. If you don&apos;t receive it shortly,
+            check your spam folder or try again.
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
@@ -130,7 +130,8 @@ export default function ForgotPasswordPage() {
           Recover Account
         </CardTitle>
         <CardDescription className="font-medium text-muted-foreground">
-          Forgotten your password? Enter your email and we'll help you reset it.
+          Forgotten your password? Enter your email and we&apos;ll help you
+          reset it.
         </CardDescription>
       </CardHeader>
       <CardContent>

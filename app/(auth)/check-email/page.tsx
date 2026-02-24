@@ -38,7 +38,8 @@ export default function CheckEmailPage() {
           Verify Inbox
         </CardTitle>
         <CardDescription className="text-base text-balance font-medium">
-          We've dispatched a secure verification link to your email address.
+          We&apos;ve dispatched a secure verification link to your email
+          address.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4 text-center">

@@ -289,9 +289,14 @@ export default function DashboardPage() {
                       {/* Visual Category Indicator */}
                       <div className="aspect-[16/10] rounded-2xl bg-muted/50 flex flex-col items-center justify-center border border-border/5 group-hover:border-primary/20 transition-all overflow-hidden relative">
                         <div className="opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500 transform">
-                          {React.cloneElement(typeIcons[session.type] as any, {
-                            size: 100,
-                          })}
+                          {React.cloneElement(
+                            typeIcons[session.type] as React.ReactElement<{
+                              size: number;
+                            }>,
+                            {
+                              size: 100,
+                            },
+                          )}
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
                           <span className="text-xs font-black uppercase tracking-widest text-[#47CEAC]">
