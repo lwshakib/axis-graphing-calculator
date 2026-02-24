@@ -495,7 +495,7 @@ export function ScientificWorkspace({
                     </TooltipTrigger>
                     <TooltipContent className="bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700 rounded-xl p-3 shadow-xl">
                       <p className="text-xs">
-                        Usa <b>LaTeX</b> or natural math. <br />
+                        Use <b>LaTeX</b> or natural math. <br />
                         Click symbols below to insert.
                       </p>
                     </TooltipContent>

@@ -17,8 +17,7 @@ const ScientificWorkspace = dynamic(
 interface ScientificWorkspaceProps {
   initialData?: {
     variables: Record<string, string>;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    history: { expr: string; res: any }[];
+    history: { input: string; output: string; timestamp: number }[];
     title: string;
   };
   sessionId?: string;

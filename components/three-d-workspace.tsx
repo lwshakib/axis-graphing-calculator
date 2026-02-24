@@ -642,7 +642,7 @@ export function ThreeDWorkspace({
               {surfaces.map((s) => (
                 <div
                   key={s.id}
-                  className="p-4 bg-transparent border border-border rounded-2xl space-y-3 group Transition-all focus-within:ring-2 focus-within:ring-emerald-500/20"
+                  className="p-4 bg-transparent border border-border rounded-2xl space-y-3 group transition-all focus-within:ring-2 focus-within:ring-emerald-500/20"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -661,7 +661,7 @@ export function ThreeDWorkspace({
                       </div>
                       <span className="text-sm font-bold">Surface Profile</span>
                     </div>
-                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 Transition-all">
+                    <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-all">
                       <button
                         onClick={() =>
                           updateSurface(s.id, "visible", !s.visible)

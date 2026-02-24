@@ -14,12 +14,27 @@ const ThreeDWorkspace = dynamic(
   { ssr: false },
 );
 
+interface Vector3D {
+  id: string;
+  x: string;
+  y: string;
+  z: string;
+  color: string;
+  visible: boolean;
+  label: string;
+}
+
+interface Surface3D {
+  id: string;
+  equation: string;
+  color: string;
+  visible: boolean;
+}
+
 interface ThreeDWorkspaceProps {
   initialData?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vectors: any[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    surfaces: any[];
+    vectors: Vector3D[];
+    surfaces: Surface3D[];
     title: string;
   };
   sessionId?: string;
