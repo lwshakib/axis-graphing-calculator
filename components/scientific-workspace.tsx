@@ -2,7 +2,7 @@
 
 /**
  * ScientificWorkspace component: An advanced mathematical environment.
- * Features natural math input via MathLive, matrix operations, 
+ * Features natural math input via MathLive, matrix operations,
  * persistent variable assignments, and calculation history.
  * Designed for complex algebra, calculus, and matrix mathematics.
  */
@@ -49,7 +49,7 @@ import { MathfieldElement } from "mathlive";
 
 /**
  * React wrapper for the <math-field> web component.
- * Uses forwardRef to allow direct access to the underlying DOM node 
+ * Uses forwardRef to allow direct access to the underlying DOM node
  * (essential for focus management and direct value manipulation).
  */
 const MathField = React.forwardRef<MathfieldElement, Record<string, unknown>>(
@@ -185,7 +185,7 @@ export function ScientificWorkspace({
 
   /**
    * Main calculation trigger.
-   * Pulls LaTeX from MathLive, parses it, handles variable assignments, 
+   * Pulls LaTeX from MathLive, parses it, handles variable assignments,
    * and delegates evaluation to the math library.
    */
   const handleCalculate = () => {
@@ -212,11 +212,18 @@ export function ScientificWorkspace({
           setVariable(name, val);
           // Update local state for UI rendering
           setVariables((prev) => ({ ...prev, [name]: formatResult(val) }));
-          
+
           setInput(latex);
           setResult(val);
           setHistory((prev) =>
-            [{ input: latex, output: formatResult(val), timestamp: Date.now() }, ...prev].slice(0, 5),
+            [
+              {
+                input: latex,
+                output: formatResult(val),
+                timestamp: Date.now(),
+              },
+              ...prev,
+            ].slice(0, 5),
           );
           setError(null);
           return;
@@ -237,7 +244,10 @@ export function ScientificWorkspace({
       setInput(latex + (latex.includes("=") ? "" : " ="));
       setResult(res);
       setHistory((prev) =>
-        [{ input: latex, output: formatResult(res), timestamp: Date.now() }, ...prev].slice(0, 5),
+        [
+          { input: latex, output: formatResult(res), timestamp: Date.now() },
+          ...prev,
+        ].slice(0, 5),
       );
       setError(null);
     } catch (e: unknown) {
@@ -263,7 +273,7 @@ export function ScientificWorkspace({
   };
 
   /**
-   * Generates a LaTeX bmatrix from the dialog state 
+   * Generates a LaTeX bmatrix from the dialog state
    * and inserts it into the primary math field.
    */
   const createMatrix = () => {
@@ -359,7 +369,8 @@ export function ScientificWorkspace({
                   key={i}
                   className="group p-2.5 rounded-xl bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 hover:border-indigo-200 transition-all cursor-pointer"
                   onClick={() => {
-                    if (mathFieldRef.current) mathFieldRef.current.value = item.input;
+                    if (mathFieldRef.current)
+                      mathFieldRef.current.value = item.input;
                   }}
                 >
                   <p className="text-[10px] text-zinc-400 truncate mb-0.5">
@@ -512,7 +523,10 @@ export function ScientificWorkspace({
                     </div>
                   ) : result !== null ? (
                     <div className="flex items-center gap-3 text-emerald-600 dark:text-emerald-400 animate-in fade-in slide-in-from-right-4">
-                      {result && (typeof result === "object" && (result as any).isMatrix || Array.isArray(result)) ? (
+                      {result &&
+                      ((typeof result === "object" &&
+                        (result as any).isMatrix) ||
+                        Array.isArray(result)) ? (
                         <MatrixRenderer data={result as any} />
                       ) : (
                         <>
@@ -763,9 +777,16 @@ export function ScientificWorkspace({
       <style jsx global>{`
         /* Error Shake Animation */
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-4px); }
-          75% { transform: translateX(4px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-4px);
+          }
+          75% {
+            transform: translateX(4px);
+          }
         }
         .animate-shake {
           animation: shake 0.2s ease-in-out infinite;

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 
 /**
  * RootLayout: The top-level layout component for the entire application.
- * Defines global fonts, metadata, theme providers, and shared UI elements 
+ * Defines global fonts, metadata, theme providers, and shared UI elements
  * like the Navbar and Toast notifications.
  */
 
@@ -79,13 +79,13 @@ export default function RootLayout({
             speed={200}
             shadow="0 0 10px var(--primary),0 0 5px var(--primary)"
           />
-          
+
           {/* Global Navbar shared across all routes */}
           <Navbar />
-          
+
           {/* Main content area with top padding to clear the fixed Navbar */}
           <div className="pt-16">{children}</div>
-          
+
           {/* Sonner Toaster for application-wide notifications */}
           <Toaster />
         </ThemeProvider>

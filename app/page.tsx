@@ -99,7 +99,7 @@ const itemVariants = {
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
-  
+
   // Track scroll position for subtle parallax/fade effects on the hero
   const { scrollYProgress } = useScroll({
     target: containerRef,

@@ -34,8 +34,8 @@ import { useRouter } from "next/navigation";
 interface Equation {
   id: string;
   expression: string; // The math string (e.g., "x^2 + 2x")
-  color: string;      // CSS hex color
-  visible: boolean;   // Whether the curve is currently drawn
+  color: string; // CSS hex color
+  visible: boolean; // Whether the curve is currently drawn
 }
 
 /** Palette of curve colors cycled through as equations are added. */
@@ -61,7 +61,7 @@ export function GraphWorkspace({
   sessionId,
 }: GraphWorkspaceProps) {
   // --- State Management ---
-  
+
   /** List of active equations, initialized from props or defaults. */
   const [equations, setEquations] = useState<Equation[]>(
     initialData?.equations || [
@@ -81,7 +81,7 @@ export function GraphWorkspace({
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(
     sessionId,
   );
-  
+
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const router = useRouter();
@@ -122,9 +122,9 @@ export function GraphWorkspace({
     setEquations(equations.map((eq) => (eq.id === id ? { ...eq, color } : eq)));
   };
 
-  /** 
-   * Removes an equation. If it's the last one, it clears characters instead 
-   * to ensure at least one row always exists in the UI. 
+  /**
+   * Removes an equation. If it's the last one, it clears characters instead
+   * to ensure at least one row always exists in the UI.
    */
   const removeEquation = (id: string) => {
     if (equations.length > 1) {
@@ -145,8 +145,8 @@ export function GraphWorkspace({
     );
   };
 
-  /** 
-   * Handles inputs from the virtual MathKeyboard. 
+  /**
+   * Handles inputs from the virtual MathKeyboard.
    * Maps special cases like backspace and common functions.
    */
   const handleKeyboardInput = (val: string) => {
@@ -265,9 +265,9 @@ export function GraphWorkspace({
     ctx.strokeStyle = isDark ? "#94a3b8" : "#000000";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(0, screenCenterY);     // X-axis
+    ctx.moveTo(0, screenCenterY); // X-axis
     ctx.lineTo(width, screenCenterY);
-    ctx.moveTo(screenCenterX, 0);     // Y-axis
+    ctx.moveTo(screenCenterX, 0); // Y-axis
     ctx.lineTo(screenCenterX, height);
     ctx.stroke();
 
@@ -353,7 +353,7 @@ export function GraphWorkspace({
               const sy = height / 2 + (centerY - yValue) * zoom;
 
               /**
-               * Asymptote Detection: 
+               * Asymptote Detection:
                * Check for vertical discontinuities (like tan(x)).
                * If there's a sign flip AND a huge vertical jump,
                * break the line path to avoid drawing a vertical stroke through infinity.
@@ -453,7 +453,6 @@ export function GraphWorkspace({
   return (
     <div className="flex h-[calc(100vh-64px)] w-full bg-background overflow-hidden font-sans text-foreground transition-colors duration-300">
       <main className="flex w-full relative flex-1">
-        
         {/* --- Sidebar Panel --- */}
         <div
           className={cn(
@@ -588,7 +587,7 @@ export function GraphWorkspace({
                 </div>
               </div>
             ))}
-            
+
             {/* Add Equation Trigger Area */}
             <div
               className="p-4 border-b border-border cursor-text text-muted-foreground/40 hover:text-muted-foreground transition-all duration-300 bg-transparent h-24 text-sm font-medium italic flex items-center justify-center border-dashed group"

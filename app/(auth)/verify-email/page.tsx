@@ -2,13 +2,13 @@
 
 /**
  * VerifyEmailPage Component
- * 
+ *
  * An automated, token-driven view that completes the email verification handshake.
- * 
+ *
  * Logic Partitioning:
- * 1. Automatic Execution: The verification request triggers via `useEffect` 
+ * 1. Automatic Execution: The verification request triggers via `useEffect`
  *    the moment the component mounts with a valid token.
- * 2. Visual Feedback Engine: Handles three distinct UI states (Verifying, 
+ * 2. Visual Feedback Engine: Handles three distinct UI states (Verifying,
  *    Success, Error) with reactive icons and status messages.
  * 3. Token-Based Security: Acts as the client-side bridge for the server's signed verification links.
  */
@@ -32,10 +32,12 @@ import { toast } from "sonner";
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-  
+
   // Deterministic initial status based on URL schema
   const initialStatus = token ? "loading" : "error";
-  const initialMessage = token ? "" : "Security check failed: No verification token provided.";
+  const initialMessage = token
+    ? ""
+    : "Security check failed: No verification token provided.";
 
   const [status, setStatus] = useState<"loading" | "success" | "error">(
     initialStatus,
@@ -44,7 +46,7 @@ function VerifyEmailContent() {
 
   /**
    * Verification Trigger:
-   * Communicates with the auth engine to invalidate the token and 
+   * Communicates with the auth engine to invalidate the token and
    * mutate the user's 'verified' status in the database.
    */
   useEffect(() => {
@@ -98,13 +100,14 @@ function VerifyEmailContent() {
           {status === "error" && "Access Denied"}
         </CardTitle>
         <CardDescription className="text-base font-medium italic">
-          {message || "Validating security token with the auth server. Please hold."}
+          {message ||
+            "Validating security token with the auth server. Please hold."}
         </CardDescription>
       </CardHeader>
       <CardContent className="text-center">
         {status === "success" && (
           <p className="text-sm text-muted-foreground/80 leading-relaxed">
-            Persistence features and advanced mathematical modeling are now 
+            Persistence features and advanced mathematical modeling are now
             unlocked for your account.
           </p>
         )}
@@ -113,7 +116,7 @@ function VerifyEmailContent() {
         <Button
           asChild
           variant={status === "success" ? "default" : "outline"}
-          className={`w-full h-12 font-bold transition-all ${status === 'success' ? 'bg-[#47CEAC] hover:bg-[#36BB9A] text-white shadow-xl shadow-[#47CEAC]/20' : 'border-border/50'}`}
+          className={`w-full h-12 font-bold transition-all ${status === "success" ? "bg-[#47CEAC] hover:bg-[#36BB9A] text-white shadow-xl shadow-[#47CEAC]/20" : "border-border/50"}`}
         >
           <Link href="/sign-in" className="flex items-center justify-center">
             {status === "success" ? (
@@ -140,7 +143,9 @@ export default function VerifyEmailPage() {
       fallback={
         <div className="flex flex-col items-center justify-center space-y-6 py-12">
           <Loader2 className="h-10 w-10 animate-spin text-primary/40" />
-          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60 animate-pulse">Establishing Secure Channel...</p>
+          <p className="text-[10px] font-black uppercase tracking-[0.4em] text-muted-foreground/60 animate-pulse">
+            Establishing Secure Channel...
+          </p>
         </div>
       }
     >

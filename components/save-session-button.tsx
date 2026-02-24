@@ -2,17 +2,17 @@
 
 /**
  * SaveSessionButton Component
- * 
- * A mission-critical utility that bridges the gap between client-side math 
- * state and server-side persistence. 
- * 
+ *
+ * A mission-critical utility that bridges the gap between client-side math
+ * state and server-side persistence.
+ *
  * Key Features:
  * 1. Intent-Based Persistence: If a guest tries to save, their intent (data type/title)
- *    is cached in localStorage, allowing the session to be automatically created 
+ *    is cached in localStorage, allowing the session to be automatically created
  *    immediately after they complete the authentication flow.
- * 2. Polymorphic Saving: Handles 'graph', 'calculator', 'scientific', and '3d' types 
+ * 2. Polymorphic Saving: Handles 'graph', 'calculator', 'scientific', and '3d' types
  *    via a unified API endpoint.
- * 3. Reactive UI: Provides visual feedback (loaders, toasts) and conditional 
+ * 3. Reactive UI: Provides visual feedback (loaders, toasts) and conditional
  *    rendering based on existing session IDs.
  */
 
@@ -39,14 +39,14 @@ interface SaveSessionButtonProps {
   type: "graph" | "calculator" | "scientific" | "3d";
   /** The state object (equations, viewport, matrices, etc.) to be JSON serialized. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  data: any; 
+  data: any;
   /** Optional: The UUID of an existing session. If provided, the button performs an update instead of a create. */
   currentSessionId?: string;
   /** Callback triggered after a successful server-side save. */
   onSaveSuccess?: (id: string, title: string) => void;
 }
 
-/** 
+/**
  * LocalStorage key used to store the persistence intent across redirects.
  * Essential for the 'Guest -> Sign In -> Automatic Save' workflow.
  */
@@ -61,16 +61,16 @@ export function SaveSessionButton({
   const [isOpen, setIsOpen] = useState(false);
   const [title, setTitle] = useState("Untitled " + type);
   const [isSaving, setIsSaving] = useState(false);
-  
+
   // Retrieve session using the better-auth client hook
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
 
   /**
    * handleSave: Communicates with the /api/sessions endpoint.
-   * If currentSessionId exists, the backend logic (implemented in the API route) 
+   * If currentSessionId exists, the backend logic (implemented in the API route)
    * will handle it as an idempotent update.
-   * 
+   *
    * @param customTitle Optional override for the session title.
    */
   const handleSave = async (customTitle?: string) => {
@@ -95,7 +95,7 @@ export function SaveSessionButton({
       const savedData = await resp.json();
       toast.success("Session saved successfully!");
       setIsOpen(false);
-      
+
       // Clear persistence intent once successfully committed to DB
       localStorage.removeItem(AUTOSAVE_KEY);
 
@@ -244,7 +244,8 @@ export function SaveSessionButton({
               </Link>
             </Button>
             <p className="text-[10px] text-center text-muted-foreground font-black uppercase tracking-[0.1em] px-4 leading-relaxed">
-              We'll remember your status and save it the moment you're redirected back.
+              We'll remember your status and save it the moment you're
+              redirected back.
             </p>
           </div>
         )}

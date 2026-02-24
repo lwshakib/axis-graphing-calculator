@@ -27,31 +27,31 @@ export function CalculatorWorkspace({
   sessionId,
 }: CalculatorWorkspaceProps) {
   // --- UI State ---
-  
+
   /** The primary number currently being typed or the final result. Defaults to "0". */
-  const [display, setDisplay] = useState(initialData?.display || "0"); 
+  const [display, setDisplay] = useState(initialData?.display || "0");
 
   /** The pending expression shown above the primary display (e.g., "5 + "). */
-  const [equation, setEquation] = useState(initialData?.equation || ""); 
+  const [equation, setEquation] = useState(initialData?.equation || "");
 
   /** The title of the current calculator session for persistence. */
   const [title, setTitle] = useState(
     initialData?.title || "Untitled Calculator",
-  ); 
+  );
 
-  /** 
-   * Flag to determine if the next digit entry should replace the current 
+  /**
+   * Flag to determine if the next digit entry should replace the current
    * display (after pressing '=') or append to it.
    */
-  const [isResult, setIsResult] = useState(false); 
+  const [isResult, setIsResult] = useState(false);
 
   /** The ID of the current saved session, used for 'Update' vs 'Create' logic. */
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(
     sessionId,
-  ); 
+  );
   const router = useRouter();
 
-  /** 
+  /**
    * Appends a digit or decimal point to the current display string.
    * Handles leading zeros and resets after a calculation result.
    */
@@ -64,7 +64,7 @@ export function CalculatorWorkspace({
     }
   };
 
-  /** 
+  /**
    * Commits the current display value and the chosen operator to the equation state.
    * Prepares the main display for the next numerical input.
    */
@@ -74,23 +74,23 @@ export function CalculatorWorkspace({
     setIsResult(false);
   };
 
-  /** 
+  /**
    * Finalizes the calculation.
    * Concatenates the equation prefix with the current display and sends it to the math parser.
    */
   const calculate = () => {
     try {
       const finalEquation = equation + display;
-      
+
       /**
        * Note: evaluateMath handles the string parsing.
-       * We replace visual symbols like '×' and '÷' if necessary, 
+       * We replace visual symbols like '×' and '÷' if necessary,
        * though the parser is robust against common variants.
        */
       const result = evaluateMath(finalEquation);
-      
-      /** 
-       * Format the result to fixed precision (8 places) to prevent floating-point artifacts 
+
+      /**
+       * Format the result to fixed precision (8 places) to prevent floating-point artifacts
        * (e.g., 0.1 + 0.2 resulting in 0.30000000000000004).
        */
       setDisplay(String(Number(result.toFixed(8))));
@@ -124,7 +124,6 @@ export function CalculatorWorkspace({
   return (
     // Main layout container for the workspace
     <div className="min-h-[calc(100vh-64px)] w-full flex flex-col items-center justify-center p-4 bg-background transition-colors duration-300">
-      
       {/* --- Workspace Header --- */}
       <div className="w-full max-w-sm mb-6 flex items-center justify-between px-2">
         <div className="flex items-center gap-2">
@@ -146,7 +145,6 @@ export function CalculatorWorkspace({
 
       {/* --- Calculator Main Body --- */}
       <div className="w-full max-w-sm bg-white dark:bg-zinc-900 rounded-[2.5rem] shadow-2xl p-6 border border-zinc-200 dark:border-zinc-800">
-        
         {/* LCD-style Display Area */}
         <div className="h-32 flex flex-col items-end justify-end px-4 mb-6">
           <div className="text-zinc-400 dark:text-zinc-500 text-lg font-medium h-6">
@@ -238,9 +236,9 @@ export function CalculatorWorkspace({
   );
 }
 
-/** 
- * Reusable functional button component with specialized styling 
- * for the calculator interface. 
+/**
+ * Reusable functional button component with specialized styling
+ * for the calculator interface.
  * Handles interaction states (hover, active scale) and uses Tailwind merging.
  */
 function CalcButton({

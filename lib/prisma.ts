@@ -10,7 +10,7 @@ const connectionString = `${process.env.DATABASE_URL}`;
 
 /**
  * Initialize the Prisma Client with the PostgreSQL adapter.
- * We use a global variable to prevent multiple instances of Prisma Client from being created 
+ * We use a global variable to prevent multiple instances of Prisma Client from being created
  * during development (Hot Module Replacement), which would exhaust database connections.
  */
 const adapter = new PrismaPg({ connectionString });

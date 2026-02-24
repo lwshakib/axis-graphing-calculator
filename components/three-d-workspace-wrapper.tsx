@@ -2,7 +2,7 @@
 
 /**
  * SSR-safe wrapper for the ThreeDWorkspace component.
- * Three.js and WebGL require the 'window' and 'document' objects, 
+ * Three.js and WebGL require the 'window' and 'document' objects,
  * so this component must only be loaded and executed in the browser.
  */
 
@@ -25,7 +25,7 @@ interface ThreeDWorkspaceProps {
   sessionId?: string;
 }
 
-/** 
+/**
  * Forwarding wrapper that ensures ThreeDWorkspace is only client-rendered.
  */
 export function ThreeDWorkspaceWrapper(props: ThreeDWorkspaceProps) {

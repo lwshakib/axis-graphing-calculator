@@ -124,7 +124,7 @@ export function UserAccount() {
           </p>
         </div>
         <DropdownMenuSeparator />
-        
+
         {/* Navigation Items */}
         <DropdownMenuItem asChild className="rounded-lg cursor-pointer">
           <Link href="/account" className="flex items-center w-full">
@@ -138,9 +138,9 @@ export function UserAccount() {
             <span>My Sessions</span>
           </Link>
         </DropdownMenuItem>
-        
+
         <DropdownMenuSeparator />
-        
+
         {/* Destructive Logout Action */}
         <DropdownMenuItem
           className="rounded-lg cursor-pointer text-destructive focus:bg-destructive/10 focus:text-destructive"

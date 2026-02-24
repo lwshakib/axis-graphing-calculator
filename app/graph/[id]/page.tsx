@@ -4,7 +4,7 @@ import { GraphWorkspaceWrapper } from "@/components/graph-workspace-wrapper";
 
 /**
  * SavedGraphPage: Dynamic route for loading a specific graphing session.
- * Fetches session data from the database using Prisma and hydrates 
+ * Fetches session data from the database using Prisma and hydrates
  * the GraphWorkspace with the saved state (equations, viewport, title).
  */
 

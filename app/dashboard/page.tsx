@@ -2,7 +2,7 @@
 
 /**
  * Dashboard Page: The centralized hub for managing user-saved mathematical sessions.
- * Provides authenticated users with a searchable, filterable grid of their 
+ * Provides authenticated users with a searchable, filterable grid of their
  * past explorations across all workspace types (Graph, Calc, 3D, etc.).
  */
 
@@ -77,7 +77,7 @@ const typeColors: Record<string, string> = {
 export default function DashboardPage() {
   const { data: session, isPending } = authClient.useSession();
   const router = useRouter();
-  
+
   // --- UI State ---
   const [sessions, setSessions] = useState<SavedSession[]>([]);
   const [loading, setLoading] = useState(true);
@@ -205,7 +205,13 @@ export default function DashboardPage() {
                   value={tab}
                   className="rounded-lg px-6 h-12 data-[state=active]:bg-background data-[state=active]:shadow-lg font-bold capitalize"
                 >
-                  {tab === "all" ? "All" : tab === "graph" ? "2D Graph" : tab === "3d" ? "3D Plotter" : "Calc"}
+                  {tab === "all"
+                    ? "All"
+                    : tab === "graph"
+                      ? "2D Graph"
+                      : tab === "3d"
+                        ? "3D Plotter"
+                        : "Calc"}
                 </TabsTrigger>
               ))}
             </TabsList>
@@ -217,7 +223,10 @@ export default function DashboardPage() {
           // Skeleton Loader
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="h-64 rounded-2xl bg-muted/30 animate-pulse border border-border/10" />
+              <div
+                key={i}
+                className="h-64 rounded-2xl bg-muted/30 animate-pulse border border-border/10"
+              />
             ))}
           </div>
         ) : filteredSessions.length > 0 ? (
@@ -236,18 +245,27 @@ export default function DashboardPage() {
                     <CardHeader className="p-6 pb-2">
                       <div className="flex items-start justify-between mb-2">
                         {/* Session Type Badge */}
-                        <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${typeColors[session.type] || "bg-muted text-muted-foreground"}`}>
+                        <div
+                          className={`flex items-center gap-2 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border ${typeColors[session.type] || "bg-muted text-muted-foreground"}`}
+                        >
                           {typeIcons[session.type] || <History size={14} />}
                           {session.type}
                         </div>
                         {/* Options Menu (Delete) */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="rounded-full h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
                               <MoreVertical size={16} />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="rounded-xl p-2">
+                          <DropdownMenuContent
+                            align="end"
+                            className="rounded-xl p-2"
+                          >
                             <DropdownMenuItem
                               className="rounded-xl cursor-pointer text-destructive focus:bg-destructive/10"
                               onClick={() => handleDelete(session.id)}
@@ -266,15 +284,19 @@ export default function DashboardPage() {
                         {format(new Date(session.updatedAt), "MMM d, yyyy")}
                       </CardDescription>
                     </CardHeader>
-                    
+
                     <CardContent className="p-6 pt-4">
                       {/* Visual Category Indicator */}
                       <div className="aspect-[16/10] rounded-2xl bg-muted/50 flex flex-col items-center justify-center border border-border/5 group-hover:border-primary/20 transition-all overflow-hidden relative">
                         <div className="opacity-10 group-hover:opacity-20 group-hover:scale-110 transition-all duration-500 transform">
-                          {React.cloneElement(typeIcons[session.type] as any, { size: 100 })}
+                          {React.cloneElement(typeIcons[session.type] as any, {
+                            size: 100,
+                          })}
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end justify-center pb-4">
-                          <span className="text-xs font-black uppercase tracking-widest text-[#47CEAC]">View Details</span>
+                          <span className="text-xs font-black uppercase tracking-widest text-[#47CEAC]">
+                            View Details
+                          </span>
                         </div>
                       </div>
                     </CardContent>
@@ -283,7 +305,9 @@ export default function DashboardPage() {
                       <Button
                         className="w-full rounded-xl h-12 font-bold flex gap-2 group/btn relative overflow-hidden"
                         variant="secondary"
-                        onClick={() => router.push(`/${session.type}/${session.id}`)}
+                        onClick={() =>
+                          router.push(`/${session.type}/${session.id}`)
+                        }
                       >
                         <ExternalLink size={18} className="relative z-10" />
                         <span className="relative z-10">Open Session</span>

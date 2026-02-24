@@ -22,9 +22,9 @@ interface CalculatorWorkspaceProps {
   sessionId?: string;
 }
 
-/** 
- * Wrapper component that provides the client-side only 
- * CalculatorWorkspace instance. 
+/**
+ * Wrapper component that provides the client-side only
+ * CalculatorWorkspace instance.
  */
 export function CalculatorWorkspaceWrapper(props: CalculatorWorkspaceProps) {
   return <CalculatorWorkspace {...props} />;

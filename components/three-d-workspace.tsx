@@ -3,9 +3,9 @@
 /**
  * ThreeDWorkspace Component: A high-performance 3D visualization environment.
  * Powered by Three.js to render vectors and mathematical surfaces in 3D.
- * Features customizable vectors, surface plotting with symbolic parsing, 
+ * Features customizable vectors, surface plotting with symbolic parsing,
  * and persistent session saving.
- * 
+ *
  * Note: Our coordinate system follows common mathematical conventions (Z-Up),
  * while Three.js uses Y-Up. The rendering engine handles this transformation.
  */
@@ -107,7 +107,7 @@ export function ThreeDWorkspace({
   const [currentSessionId, setCurrentSessionId] = useState<string | undefined>(
     sessionId,
   );
-  
+
   const router = useRouter();
 
   // --- Three.js Engine References ---
@@ -117,7 +117,7 @@ export function ThreeDWorkspace({
   const controlsRef = useRef<OrbitControls | null>(null);
 
   /** Reusable group node that holds all dynamic math objects for easy bulk management. */
-  const objectsGroupRef = useRef<THREE.Group | null>(null); 
+  const objectsGroupRef = useRef<THREE.Group | null>(null);
   const gridHelperRef = useRef<THREE.GridHelper | null>(null);
   const zAxisLineRef = useRef<THREE.Line | null>(null);
 
@@ -143,7 +143,7 @@ export function ThreeDWorkspace({
     if (!containerRef.current) return;
 
     const container = containerRef.current;
-    
+
     // 1. Scene Setup
     const scene = new THREE.Scene();
     sceneRef.current = scene;
@@ -283,18 +283,18 @@ export function ThreeDWorkspace({
     // --- Render Vectors ---
     vectors.forEach((v) => {
       if (!v.visible) return;
-      
+
       const x = parseFloat(v.x) || 0;
       const y = parseFloat(v.y) || 0;
       const z = parseFloat(v.z) || 0;
 
-      /** 
+      /**
        * Coordinate Mapping (Z-Up Assumption):
        * Math(X) -> Three(X)
        * Math(Y) -> Three(-Z)  // Depth axis
        * Math(Z) -> Three(Y)   // Height axis
        */
-      
+
       // Vector Head (Visualized as a Sphere)
       const sphereGeom = new THREE.SphereGeometry(0.1, 16, 16);
       const sphereMat = new THREE.MeshPhongMaterial({ color: v.color });
@@ -325,10 +325,10 @@ export function ThreeDWorkspace({
         // Compile the equation once for the surface mesh
         const fn = compileMath(s.equation);
         const segments = 60; // Grid resolution (higher = smoother, slower)
-        const range = 10;    // Size of the plane in math units
-        
-        /** 
-         * Generate a PlaneGeometry then manually set the vertical displacement 
+        const range = 10; // Size of the plane in math units
+
+        /**
+         * Generate a PlaneGeometry then manually set the vertical displacement
          * (z-attribute) for every vertex based on the math function result.
          */
         const geometry = new THREE.PlaneGeometry(
@@ -352,7 +352,7 @@ export function ThreeDWorkspace({
           const vy = vertices[i + 1];
           // Evaluate z = f(x, y)
           const zValue = fn({ x: vx, y: vy });
-          
+
           // Apply displacement (PlaneGeometry uses the 3rd index for depth by default)
           vertices[i + 2] = zValue;
         }
@@ -360,10 +360,10 @@ export function ThreeDWorkspace({
         // Notify Three.js that vertices moved and normals need recalculating for lighting
         geometry.attributes.position.needsUpdate = true;
         geometry.computeVertexNormals();
-        
+
         const mesh = new THREE.Mesh(geometry, material);
         // Rotate the plane to align with the math coordinate system
-        mesh.rotation.x = -Math.PI / 2; 
+        mesh.rotation.x = -Math.PI / 2;
         group.add(mesh);
 
         /** Sub-Effect: Add a faint wireframe overlay to improve structural visibility */
@@ -389,7 +389,9 @@ export function ThreeDWorkspace({
       ...vectors,
       {
         id: Math.random().toString(36).substr(2, 9),
-        x: "0", y: "0", z: "0",
+        x: "0",
+        y: "0",
+        z: "0",
         color: `hsl(${Math.random() * 360}, 70%, 50%)`,
         visible: true,
         label: `v${vectors.length + 1}`,
@@ -412,17 +414,23 @@ export function ThreeDWorkspace({
   /** Updates attributes of a vector, ensuring type safety for field indexing. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateVector = (id: string, field: keyof Vector3D, value: any) => {
-    setVectors(vectors.map((v) => (v.id === id ? { ...v, [field]: value } : v)));
+    setVectors(
+      vectors.map((v) => (v.id === id ? { ...v, [field]: value } : v)),
+    );
   };
 
   /** Updates attributes of a surface. */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updateSurface = (id: string, field: keyof Surface3D, value: any) => {
-    setSurfaces(surfaces.map((s) => (s.id === id ? { ...s, [field]: value } : s)));
+    setSurfaces(
+      surfaces.map((s) => (s.id === id ? { ...s, [field]: value } : s)),
+    );
   };
 
-  const removeVector = (id: string) => setVectors(vectors.filter((v) => v.id !== id));
-  const removeSurface = (id: string) => setSurfaces(surfaces.filter((s) => s.id !== id));
+  const removeVector = (id: string) =>
+    setVectors(vectors.filter((v) => v.id !== id));
+  const removeSurface = (id: string) =>
+    setSurfaces(surfaces.filter((s) => s.id !== id));
 
   /** Integrates with the custom MathKeyboard to handle special keys and auto-parentheses. */
   const handleKeyboardInput = (val: string) => {
@@ -448,9 +456,17 @@ export function ThreeDWorkspace({
             if (val === "backspace")
               return { ...s, equation: s.equation.slice(0, -1) };
             if (val === "clear") return { ...s, equation: "" };
-            
+
             // Auto-parenthesize common trigonometric and math functions
-            const isFunc = ["sin", "cos", "tan", "sqrt", "log", "ln", "abs"].includes(val);
+            const isFunc = [
+              "sin",
+              "cos",
+              "tan",
+              "sqrt",
+              "log",
+              "ln",
+              "abs",
+            ].includes(val);
             const insert = isFunc ? `${val}(` : val;
             return { ...s, equation: s.equation + insert };
           }
@@ -462,7 +478,6 @@ export function ThreeDWorkspace({
 
   return (
     <div className="flex h-[calc(100vh-64px)] w-full bg-background overflow-hidden font-sans text-foreground transition-colors duration-300">
-      
       {/* --- Sidebar Panel --- */}
       <div
         className={cn(
@@ -530,20 +545,37 @@ export function ThreeDWorkspace({
                           type="color"
                           value={v.color}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair scale-150"
-                          onChange={(e) => updateVector(v.id, "color", e.target.value)}
+                          onChange={(e) =>
+                            updateVector(v.id, "color", e.target.value)
+                          }
                         />
                       </div>
                       <input
                         className="bg-transparent border-none font-bold text-sm w-16 outline-none rounded-none"
                         value={v.label}
-                        onChange={(e) => updateVector(v.id, "label", e.target.value)}
-                        onFocus={() => setActiveInput({ type: "vector", id: v.id, field: "label" })}
+                        onChange={(e) =>
+                          updateVector(v.id, "label", e.target.value)
+                        }
+                        onFocus={() =>
+                          setActiveInput({
+                            type: "vector",
+                            id: v.id,
+                            field: "label",
+                          })
+                        }
                       />
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
-                        onClick={() => updateVector(v.id, "visible", !v.visible)}
-                        className={cn("p-1.5 rounded-lg transition-colors", v.visible ? "text-indigo-600" : "text-muted-foreground")}
+                        onClick={() =>
+                          updateVector(v.id, "visible", !v.visible)
+                        }
+                        className={cn(
+                          "p-1.5 rounded-lg transition-colors",
+                          v.visible
+                            ? "text-indigo-600"
+                            : "text-muted-foreground",
+                        )}
                       >
                         {v.visible ? <Eye size={16} /> : <EyeOff size={16} />}
                       </button>
@@ -558,11 +590,21 @@ export function ThreeDWorkspace({
                   <div className="grid grid-cols-3 gap-2">
                     {["x", "y", "z"].map((axis) => (
                       <div key={axis} className="space-y-1">
-                        <label className="text-[10px] uppercase font-bold text-muted-foreground/60 block text-center">{axis}</label>
+                        <label className="text-[10px] uppercase font-bold text-muted-foreground/60 block text-center">
+                          {axis}
+                        </label>
                         <Input
                           value={(v as any)[axis]}
-                          onChange={(e) => updateVector(v.id, axis as any, e.target.value)}
-                          onFocus={() => setActiveInput({ type: "vector", id: v.id, field: axis as any })}
+                          onChange={(e) =>
+                            updateVector(v.id, axis as any, e.target.value)
+                          }
+                          onFocus={() =>
+                            setActiveInput({
+                              type: "vector",
+                              id: v.id,
+                              field: axis as any,
+                            })
+                          }
                           className="h-8 text-center bg-transparent border-none shadow-none rounded-none font-mono text-xs"
                         />
                       </div>
@@ -602,15 +644,24 @@ export function ThreeDWorkspace({
                           type="color"
                           value={s.color}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-crosshair scale-150"
-                          onChange={(e) => updateSurface(s.id, "color", e.target.value)}
+                          onChange={(e) =>
+                            updateSurface(s.id, "color", e.target.value)
+                          }
                         />
                       </div>
                       <span className="text-sm font-bold">Surface Profile</span>
                     </div>
                     <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 Transition-all">
                       <button
-                        onClick={() => updateSurface(s.id, "visible", !s.visible)}
-                        className={cn("p-1.5 rounded-lg transition-colors", s.visible ? "text-emerald-600" : "text-muted-foreground")}
+                        onClick={() =>
+                          updateSurface(s.id, "visible", !s.visible)
+                        }
+                        className={cn(
+                          "p-1.5 rounded-lg transition-colors",
+                          s.visible
+                            ? "text-emerald-600"
+                            : "text-muted-foreground",
+                        )}
                       >
                         {s.visible ? <Eye size={16} /> : <EyeOff size={16} />}
                       </button>
@@ -623,11 +674,17 @@ export function ThreeDWorkspace({
                     </div>
                   </div>
                   <div className="space-y-1">
-                    <label className="text-[10px] uppercase font-bold text-muted-foreground/60 italic pl-1">z = f(x, y)</label>
+                    <label className="text-[10px] uppercase font-bold text-muted-foreground/60 italic pl-1">
+                      z = f(x, y)
+                    </label>
                     <Input
                       value={s.equation}
-                      onChange={(e) => updateSurface(s.id, "equation", e.target.value)}
-                      onFocus={() => setActiveInput({ type: "surface", id: s.id })}
+                      onChange={(e) =>
+                        updateSurface(s.id, "equation", e.target.value)
+                      }
+                      onFocus={() =>
+                        setActiveInput({ type: "surface", id: s.id })
+                      }
                       className="h-8 font-mono text-sm bg-transparent border-none shadow-none rounded-none placeholder:text-muted-foreground/30"
                       placeholder="e.g. sin(x) * cos(y)"
                     />
@@ -641,8 +698,14 @@ export function ThreeDWorkspace({
         {/* --- Sidebar Footer Actions --- */}
         <div className="p-4 border-t border-border bg-background flex gap-2">
           <Button
-            variant="outline" size="sm"
-            className={cn("h-10 px-4 grow gap-2 rounded-xl transition-all font-bold", keyboardOpen ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20" : "")}
+            variant="outline"
+            size="sm"
+            className={cn(
+              "h-10 px-4 grow gap-2 rounded-xl transition-all font-bold",
+              keyboardOpen
+                ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
+                : "",
+            )}
             onClick={() => setKeyboardOpen(!keyboardOpen)}
           >
             <Keyboard size={18} />
@@ -652,7 +715,17 @@ export function ThreeDWorkspace({
             variant="outline"
             className="gap-2 rounded-xl h-10 border-border/50 text-muted-foreground hover:text-foreground"
             onClick={() => {
-              setVectors([{ id: "1", x: "1", y: "1", z: "1", color: "#4f46e5", visible: true, label: "v1" }]);
+              setVectors([
+                {
+                  id: "1",
+                  x: "1",
+                  y: "1",
+                  z: "1",
+                  color: "#4f46e5",
+                  visible: true,
+                  label: "v1",
+                },
+              ]);
               setSurfaces([]);
             }}
           >
@@ -669,8 +742,11 @@ export function ThreeDWorkspace({
 
       {/* --- Primary Stage Area --- */}
       <div className="flex-1 h-full relative group">
-        <div ref={containerRef} className="w-full h-full cursor-grab active:cursor-grabbing" />
-        
+        <div
+          ref={containerRef}
+          className="w-full h-full cursor-grab active:cursor-grabbing"
+        />
+
         {/* Toggle Sidebar Trigger */}
         <div className="absolute top-6 left-6 flex items-center gap-2">
           {!sidebarOpen && (

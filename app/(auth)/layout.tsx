@@ -5,12 +5,12 @@ import { notFound } from "next/navigation";
 
 /**
  * AuthLayout: The protective wrapper for login, signup, and reset flows.
- * 
- * Aesthetic: Provides a focused, centered experience for user credentials, 
+ *
+ * Aesthetic: Provides a focused, centered experience for user credentials,
  * using 'animate-in' for a premium entry transition.
- * 
+ *
  * Logic: Implements a "Negative Auth" guard. If a user already has an active session,
- * we trigger a 404 (notFound()) to prevent them from accessing sign-in pages. 
+ * we trigger a 404 (notFound()) to prevent them from accessing sign-in pages.
  * This keeps the application state logical and clean.
  */
 export default async function AuthLayout({

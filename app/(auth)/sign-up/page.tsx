@@ -2,13 +2,13 @@
 
 /**
  * SignUpPage Component
- * 
+ *
  * Facilitates the onboarding of new users.
  * Supports manual registration via email/password and social onboarding via Google.
- * 
+ *
  * Key Logic:
  * 1. Data Collection: Captures 'name', 'email', and 'password'.
- * 2. Verification Flow: After a successful email signup, the user is redirected 
+ * 2. Verification Flow: After a successful email signup, the user is redirected
  *    to a 'Check Email' screen for link-based verification (handled by Better-Auth).
  * 3. Unified Auth Client: Uses the same central 'authClient' instance as the rest of the app.
  */
@@ -131,7 +131,11 @@ export default function SignUpPage() {
               className="bg-muted/20"
             />
           </div>
-          <Button type="submit" className="w-full font-bold h-11" disabled={loading}>
+          <Button
+            type="submit"
+            className="w-full font-bold h-11"
+            disabled={loading}
+          >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Sign Up
           </Button>

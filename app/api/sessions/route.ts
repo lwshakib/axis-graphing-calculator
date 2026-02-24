@@ -5,10 +5,10 @@ import { headers } from "next/headers";
 
 /**
  * POST /api/sessions
- * 
+ *
  * An idempotent endpoint for persisting mathematical workspaces.
  * Supports both creating new sessions and updating existing ones based on the presence of an 'id'.
- * 
+ *
  * Request Body:
  * - id: Optional UUID (if provided, triggers an update)
  * - type: 'graph' | 'calculator' | 'scientific' | '3d'
@@ -73,11 +73,11 @@ export async function POST(req: NextRequest) {
 
 /**
  * GET /api/sessions
- * 
- * Multi-purpose retrieval endpoint. 
- * Returns a list of sessions owned by the authenticated user, 
+ *
+ * Multi-purpose retrieval endpoint.
+ * Returns a list of sessions owned by the authenticated user,
  * optionally filtered by workspace type.
- * 
+ *
  * Query Parameters:
  * - type (Optional): Filter by 'graph', 'calculator', etc.
  */

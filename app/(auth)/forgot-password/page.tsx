@@ -2,10 +2,10 @@
 
 /**
  * ForgotPasswordPage Component
- * 
- * Part of the secondary authentication flow. 
+ *
+ * Part of the secondary authentication flow.
  * Allows users to initiate a password recovery process via email.
- * 
+ *
  * Flow:
  * 1. User provides their registered email.
  * 2. 'authClient.requestPasswordReset' is called with a redirect target.
@@ -81,17 +81,23 @@ export default function ForgotPasswordPage() {
           </CardTitle>
           <CardDescription className="text-base italic">
             A secure link has been sent to{" "}
-            <span className="font-bold text-foreground underline decoration-primary/30 underline-offset-4">{email}</span>.
+            <span className="font-bold text-foreground underline decoration-primary/30 underline-offset-4">
+              {email}
+            </span>
+            .
           </CardDescription>
         </CardHeader>
         <CardContent className="text-center">
           <p className="text-sm text-muted-foreground/80 leading-relaxed px-4">
-            The link is valid for 1 hour. If you don't receive it shortly, 
-            check your spam folder or try again.
+            The link is valid for 1 hour. If you don't receive it shortly, check
+            your spam folder or try again.
           </p>
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
-          <Button asChild className="w-full font-bold h-11 bg-primary text-primary-foreground shadow-xl shadow-primary/20">
+          <Button
+            asChild
+            className="w-full font-bold h-11 bg-primary text-primary-foreground shadow-xl shadow-primary/20"
+          >
             <a
               href="https://mail.google.com" // Quick-link convenience for Gmail users
               target="_blank"
@@ -100,7 +106,11 @@ export default function ForgotPasswordPage() {
               Check Gmail Inbox
             </a>
           </Button>
-          <Button asChild variant="outline" className="w-full h-11 border-border/50 font-semibold">
+          <Button
+            asChild
+            variant="outline"
+            className="w-full h-11 border-border/50 font-semibold"
+          >
             <Link href="/sign-in" className="flex items-center justify-center">
               <ArrowLeft className="mr-2 h-4 w-4" /> Return to Sign In
             </Link>
@@ -126,7 +136,12 @@ export default function ForgotPasswordPage() {
       <CardContent>
         <form onSubmit={handleSubmit} className="grid gap-4">
           <div className="grid gap-2">
-            <Label htmlFor="email" className="font-bold text-[10px] uppercase tracking-widest pl-1">Email Address</Label>
+            <Label
+              htmlFor="email"
+              className="font-bold text-[10px] uppercase tracking-widest pl-1"
+            >
+              Email Address
+            </Label>
             <Input
               id="email"
               type="email"
@@ -138,15 +153,26 @@ export default function ForgotPasswordPage() {
               className="bg-muted/20 h-12 rounded-xl focus-visible:ring-primary/20"
             />
           </div>
-          <Button type="submit" className="w-full h-12 font-bold text-lg" disabled={loading}>
+          <Button
+            type="submit"
+            className="w-full h-12 font-bold text-lg"
+            disabled={loading}
+          >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Reset Password
           </Button>
         </form>
       </CardContent>
       <CardFooter>
-        <Button asChild variant="ghost" className="w-full h-10 text-muted-foreground hover:text-primary transition-colors">
-          <Link href="/sign-in" className="flex items-center justify-center font-bold">
+        <Button
+          asChild
+          variant="ghost"
+          className="w-full h-10 text-muted-foreground hover:text-primary transition-colors"
+        >
+          <Link
+            href="/sign-in"
+            className="flex items-center justify-center font-bold"
+          >
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Login
           </Link>
         </Button>

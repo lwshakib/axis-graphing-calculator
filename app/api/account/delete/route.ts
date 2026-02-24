@@ -5,15 +5,15 @@ import { headers } from "next/headers";
 
 /**
  * DELETE /api/account/delete
- * 
+ *
  * The "Nuclear Option" of account management.
  * Permanently removes the authenticated user's profile and all associated data.
- * 
+ *
  * Logic:
  * 1. Checks for a valid session.
  * 2. Deletes the 'User' record from the database.
- * 3. Rely on Database-level Cascades: The Prisma schema is configured to 
- *    automatically remove all 'SavedSession', 'Account', and 'Session' records 
+ * 3. Rely on Database-level Cascades: The Prisma schema is configured to
+ *    automatically remove all 'SavedSession', 'Account', and 'Session' records
  *    linked to this User ID.
  */
 export async function DELETE() {

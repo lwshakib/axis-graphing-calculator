@@ -73,7 +73,7 @@ export function MathKeyboard({ onInput, onClose, isOpen }: MathKeyboardProps) {
               {key === "sqrt" ? "√" : key === "pi" ? "π" : key}
             </Button>
           ))}
-          
+
           {/* Action Buttons: Spanning multiple columns */}
           <Button
             variant="destructive"

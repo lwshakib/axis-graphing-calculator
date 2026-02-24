@@ -2,10 +2,10 @@
 
 /**
  * SignInPage Component
- * 
+ *
  * Provides the user interface for authenticating existing users.
  * Supports standard email/password credentials and OAuth-based social login (Google).
- * 
+ *
  * Features:
  * 1. Reactive Input: Managed form state for credentials.
  * 2. Visual Feedback: Loading states and toast notifications (success/error).
@@ -49,8 +49,8 @@ export default function SignInPage() {
         callbackURL: "/dashboard",
       },
       {
-        /** 
-         * Lifecycle Hooks: 
+        /**
+         * Lifecycle Hooks:
          * Better-Auth provides convenient hooks for managing complex async UI states.
          */
         onRequest: () => setLoading(true),
@@ -124,7 +124,11 @@ export default function SignInPage() {
               className="bg-muted/20"
             />
           </div>
-          <Button type="submit" className="w-full font-bold h-11" disabled={loading}>
+          <Button
+            type="submit"
+            className="w-full font-bold h-11"
+            disabled={loading}
+          >
             {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Sign In
           </Button>

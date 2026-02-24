@@ -6,7 +6,7 @@ const math = create(all);
 /**
  * A powerful mathematical expression parser backed by math.js.
  * Supports matrices, calculus, vectors, and advanced algebra.
- * This library acts as the bridge between LaTeX/AsciiMath inputs 
+ * This library acts as the bridge between LaTeX/AsciiMath inputs
  * and the numerical engine.
  */
 
@@ -42,9 +42,9 @@ export function clearScope() {
 
 /**
  * Custom Numerical Integration using Simpson's Rule (Definite): integrate(f(x), a, b)
- * Implements a standard numerical approximation for functions that may not 
+ * Implements a standard numerical approximation for functions that may not
  * have elementary antiderivatives.
- * 
+ *
  * @param fExpr The function expression or function object to integrate
  * @param a Lower bound of integration
  * @param b Upper bound of integration
@@ -105,7 +105,7 @@ math.import(
 /**
  * Evaluates a mathematical expression using math.js.
  * Includes heavy pre-processing to handle LaTeX and AsciiMath syntax.
- * 
+ *
  * @param expression The expression string to evaluate
  * @param scope Optional local scope for this specific evaluation
  * @returns The resulting math value (number, matrix, etc.)
@@ -183,20 +183,20 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
 
     // Replace LaTeX symbols with mathjs operators
     normalized = normalized
-      .replace(/\\cdot/g, "*")           // Multiplier dot
-      .replace(/\\times/g, "*")          // Multiplication cross
-      .replace(/\\left\(/g, "(")         // Left parenthesis
-      .replace(/\\right\)/g, ")")        // Right parenthesis
-      .replace(/\\left\[/g, "[")         // Left bracket
-      .replace(/\\right\]/g, "]")        // Right bracket
-      .replace(/\\left\|/g, "abs(")     // Left absolute value bar
-      .replace(/\\right\|/g, ")")        // Right absolute value bar
-      .replace(/\\lvert/g, "abs(")       // Alternative absolute value command
-      .replace(/\\rvert/g, ")")          // Alternative absolute value command
-      .replace(/\\/g, "")               // Strip remaining backslashes
-      .replace(/×/g, "*")                // Unicode multiplication
-      .replace(/÷/g, "/")                // Unicode division
-      .replace(/π/g, "pi");              // Unicode pi symbol
+      .replace(/\\cdot/g, "*") // Multiplier dot
+      .replace(/\\times/g, "*") // Multiplication cross
+      .replace(/\\left\(/g, "(") // Left parenthesis
+      .replace(/\\right\)/g, ")") // Right parenthesis
+      .replace(/\\left\[/g, "[") // Left bracket
+      .replace(/\\right\]/g, "]") // Right bracket
+      .replace(/\\left\|/g, "abs(") // Left absolute value bar
+      .replace(/\\right\|/g, ")") // Right absolute value bar
+      .replace(/\\lvert/g, "abs(") // Alternative absolute value command
+      .replace(/\\rvert/g, ")") // Alternative absolute value command
+      .replace(/\\/g, "") // Strip remaining backslashes
+      .replace(/×/g, "*") // Unicode multiplication
+      .replace(/÷/g, "/") // Unicode division
+      .replace(/π/g, "pi"); // Unicode pi symbol
 
     // Pattern: d/dx(expr)
     normalized = normalized.replace(
@@ -221,7 +221,12 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
 
     return result;
   } catch (error) {
-    console.error("Evaluation Error in math-parser:", error, "Expression:", expression);
+    console.error(
+      "Evaluation Error in math-parser:",
+      error,
+      "Expression:",
+      expression,
+    );
     throw error;
   }
 }
@@ -229,7 +234,7 @@ export function evaluateMath(expression: string, scope?: Record<string, any>) {
 /**
  * Compiles a mathematical expression into a reusable function for performance.
  * Best for graphing where the same expression is evaluated for many 'x' values.
- * 
+ *
  * @param expression The expression string to compile
  * @returns A function that takes a scope and returns the evaluation result
  */
@@ -250,7 +255,7 @@ export function compileMath(expression: string) {
     const node = math.parse(normalized);
     // Compile the AST into JavaScript code
     const code = node.compile();
-    
+
     // Return a wrapped function that uses the provided scope or global scope
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return (scope?: Record<string, any>) =>
@@ -290,7 +295,7 @@ export function integrate(
 /**
  * Formats a mathjs result for display.
  * Handles numbers (with precision), matrices, and other complex types.
- * 
+ *
  * @param result The value to format
  * @returns A user-friendly string representation
  */

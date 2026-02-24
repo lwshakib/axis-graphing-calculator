@@ -5,7 +5,7 @@ import { twMerge } from "tailwind-merge";
 
 /**
  * A utility function that combines clsx and tailwind-merge.
- * It allows for conditional classes and ensures that Tailwind classes are merged 
+ * It allows for conditional classes and ensures that Tailwind classes are merged
  * correctly (e.g., overriding padding classes).
  *
  * @param inputs - Array of class names, objects, or arrays to be merged.

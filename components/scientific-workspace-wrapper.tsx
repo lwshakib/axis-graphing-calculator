@@ -2,7 +2,7 @@
 
 /**
  * SSR-safe wrapper for the ScientificWorkspace component.
- * MathLive and its custom elements interact with the DOM directly, 
+ * MathLive and its custom elements interact with the DOM directly,
  * so this component must be hydrated exclusively on the client-side.
  */
 
@@ -24,7 +24,7 @@ interface ScientificWorkspaceProps {
   sessionId?: string;
 }
 
-/** 
+/**
  * Forwarding wrapper that ensures ScientificWorkspace is only client-rendered.
  */
 export function ScientificWorkspaceWrapper(props: ScientificWorkspaceProps) {
