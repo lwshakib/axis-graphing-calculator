@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
-import { Logo } from "@/components/logo";
+
 
 export default function SignInPage() {
   const [email, setEmail] = useState("");
@@ -56,9 +56,7 @@ export default function SignInPage() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-        <div className="flex justify-center mb-4">
-          <Logo className="h-10 w-10" showText={false} />
-        </div>
+
         <CardTitle className="text-2xl font-bold tracking-tight">
           Welcome back
         </CardTitle>

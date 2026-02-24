@@ -122,7 +122,7 @@ export function SaveSessionButton({
           <span className="text-xs uppercase tracking-wider">{currentSessionId ? "Save" : "Save Changes"}</span>
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px] rounded-[2.5rem] border-none shadow-2xl p-8">
+      <DialogContent className="sm:max-w-[425px] rounded-xl border shadow-2xl p-8">
         <DialogHeader>
           <DialogTitle className="text-3xl font-black">Save Session</DialogTitle>
           <DialogDescription className="font-medium text-muted-foreground pt-1">
@@ -142,7 +142,7 @@ export function SaveSessionButton({
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="My Brilliant Math"
-              className="rounded-2xl h-14 text-lg font-bold border-border/50 focus-visible:ring-[#47CEAC]/30 bg-muted/20"
+              className="rounded-lg h-14 text-lg font-bold border-border/50 focus-visible:ring-[#47CEAC]/30 bg-muted/20"
             />
           </div>
         </div>
@@ -152,7 +152,7 @@ export function SaveSessionButton({
             <Button 
               disabled={isSaving} 
               onClick={() => handleSave()}
-              className="w-full h-14 rounded-2xl text-lg font-bold gap-3 bg-[#47CEAC] hover:bg-[#36BB9A] text-white shadow-xl shadow-[#47CEAC]/20 border-none transition-all active:scale-[0.98]"
+              className="w-full h-14 rounded-xl text-lg font-bold gap-3 bg-[#47CEAC] hover:bg-[#36BB9A] text-white shadow-xl shadow-[#47CEAC]/20 border-none transition-all active:scale-[0.98]"
             >
               {isSaving ? <Loader2 className="animate-spin" size={20} /> : <Save size={20} />}
               Save Session
@@ -162,7 +162,7 @@ export function SaveSessionButton({
           <div className="flex flex-col gap-4">
             <Button 
                 asChild
-                className="h-14 w-full rounded-2xl text-lg font-bold flex gap-3 bg-[#47CEAC] hover:bg-[#36BB9A] text-white shadow-xl shadow-[#47CEAC]/20 border-none transition-all active:scale-[0.98]" 
+                className="h-14 w-full rounded-xl text-lg font-bold flex gap-3 bg-[#47CEAC] hover:bg-[#36BB9A] text-white shadow-xl shadow-[#47CEAC]/20 border-none transition-all active:scale-[0.98]" 
                 onClick={prepareAutoSave}
               >
                 <Link href={`/sign-in?callbackURL=${encodeURIComponent(window.location.pathname)}`}>

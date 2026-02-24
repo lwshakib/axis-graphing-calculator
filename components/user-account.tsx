@@ -83,7 +83,7 @@ export function UserAccount() {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 rounded-2xl p-2" align="end" forceMount>
+      <DropdownMenuContent className="w-56 rounded-xl p-2" align="end" forceMount>
         <div className="flex flex-col space-y-1 p-3">
           <p className="text-sm font-black leading-none">{user.name}</p>
           <p className="text-xs leading-none text-muted-foreground truncate">{user.email}</p>

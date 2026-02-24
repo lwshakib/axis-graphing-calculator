@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { CheckCircle2, XCircle, Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Logo } from "@/components/logo";
+
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
@@ -54,9 +54,7 @@ function VerifyEmailContent() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-        <div className="flex justify-center mb-4">
-          <Logo className="h-10 w-10" showText={false} />
-        </div>
+
         <div className="flex justify-center mb-4">
           {status === "loading" && (
             <div className="rounded-full bg-primary/10 p-3">

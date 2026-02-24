@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Logo } from "@/components/logo";
+
 
 export default function SignUpPage() {
   const [email, setEmail] = useState("");
@@ -61,9 +61,7 @@ export default function SignUpPage() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="text-center space-y-1">
-        <div className="flex justify-center mb-4">
-          <Logo className="h-10 w-10" showText={false} />
-        </div>
+
         <CardTitle className="text-2xl font-bold tracking-tight">
           Create an account
         </CardTitle>

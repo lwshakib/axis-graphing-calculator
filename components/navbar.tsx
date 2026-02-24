@@ -88,7 +88,7 @@ export function Navbar() {
                 <Menu size={24} />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-2 rounded-2xl shadow-2xl backdrop-blur-xl bg-background/90 border-border/50">
+            <DropdownMenuContent align="end" className="w-56 p-2 rounded-xl shadow-2xl backdrop-blur-xl bg-background/90 border-border/50">
               {navItems.map((item) => {
                 const Icon = item.icon;
                 const isActive = pathname === item.href;
