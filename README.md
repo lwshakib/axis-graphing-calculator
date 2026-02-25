@@ -1,4 +1,4 @@
-# AXIS Graphing Calculator
+# <img src="public/logo.svg" width="40" height="40" align="left" style="margin-right: 12px;"> AXIS Graphing Calculator
 
 AXIS is a professional, high-performance mathematical suite designed for precision visualization and symbolic computation. Built with modern web technologies, it provides a seamless experience for students, engineers, and researchers to explore mathematical concepts in 2D and 3D.
 
@@ -39,6 +39,7 @@ AXIS is a professional, high-performance mathematical suite designed for precisi
 ## 🏗 System Architecture
 
 ```mermaid
+%%{init: {'theme': 'neutral'}}%%
 graph TD
     User([User])
     UI[AXIS Frontend - Next.js]
